@@ -34,7 +34,7 @@ class MainWindow(qtw.QMainWindow):
         self.main_widget.layout().addWidget(self.menu_widget)
         self.main_widget.layout().addWidget(self.main_window)
         self.main_widget.layout().setContentsMargins(0,0,0,0)
-        with open(r'B:\Learning\Python\MyScripts\nhentaiUtil\nhentaiUtils\nhentaiBrowser\stylesheet.css') as f:
+        with open(r'.\nhentaiBrowser\stylesheet.css') as f:
             # print(f.read())
             self.setStyleSheet(f.read())
             pass
