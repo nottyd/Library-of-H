@@ -1,0 +1,144 @@
+/* ---------------------------------------------------- MAINWINDOW ---------------------------------------------------- */
+QMainWindow#MainWindow {
+    background-color: #1f1f1f;
+    border-style: none;
+}
+QLabel#MW_Label {
+    background-color: #0d0d0d;
+    border-style: none;
+}
+
+ImageScrollArea {
+    background-color: #0d0d0d;
+    border-style: none;
+}
+
+QWidget#MW_Widget {
+    background-color: #1f1f1f;
+}
+QPushButton#MW_PushButtons {
+    background-color: #1f1f1f;
+    color: #fdf8ff;
+    height: 50px;
+    border-style: none;
+    font-weight: bold;
+}
+QPushButton#MW_PushButtons::hover {
+    background-color: white;
+}
+
+/* ---------------------------------------------------- EXPLORER ---------------------------------------------------- */
+* {
+    color: #c8cdc8;
+}
+
+/* #-------------------- search box --------------------*/
+QLineEdit#EXP_LineEdit
+{
+     background-color: #4d4d4d;
+     color: #bbbcbb;
+     border-style: none;
+     height: 22px;
+}
+
+QPushButton#EXP_PushButton
+{
+     background-color: #ed2553;
+     color: #fdf8ff;
+}
+
+QComboBox#EXP_ComboBox {
+     background-color: #4d4d4d;
+     color: #bbbcbb;
+     height: 20px;
+    selection-color: #bbbcbb;
+    selection-background-color: #4d4d4d;
+}
+
+QComboBox#EXP_ComboBox QListView
+{
+     background-color: #4d4d4d;
+     color: #bbbcbb;
+     height: 20px;
+}
+
+/* #-------------------- browser scrollarea --------------------*/
+QScrollArea
+{
+    background: #1f1f1f;
+    border: none;
+}
+
+BrowserItemWidget
+{
+    background: #363636;
+}
+
+QScrollBar:horizontal
+{
+    background: #1f1f1f;
+    height: 8px;
+    margin: 2px 2px;
+    border-radius: 3px;
+}
+
+QScrollBar::handle:horizontal
+{
+    background: #686868;
+    min-width: 3px;
+}
+
+QScrollBar::add-line:horizontal
+{
+    border: none;
+    background: none;
+    height: 0px;
+}
+
+QScrollBar::sub-line:horizontal
+{
+    border: none;
+    background: none;
+    height: 0px;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal
+{
+    background: none;
+    height: 0px;
+}
+
+QScrollBar:vertical
+{
+    background: #1f1f1f;
+    width: 8px;
+    margin: 2px 2px;
+    border-radius: 3px;
+}
+
+QScrollBar::handle:vertical
+{
+    background: #686868;
+    min-height: 5px;
+    border-radius: 5px;
+}
+
+QScrollBar::sub-line:vertical
+{
+    border: none;
+    background: none;
+    height: 0px;
+}
+
+QScrollBar::add-line:vertical
+{
+    border: none;
+    background: none;
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
+{
+    background: none;
+    height: 0px;
+}
