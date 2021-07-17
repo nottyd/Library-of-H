@@ -3,19 +3,32 @@ from PyQt5 import QtGui as qtg
 from PyQt5 import QtCore as qtc
 
 class ImageScrollArea(qtw.QScrollArea):
-    def __init__(self, main_window, objectName=''):
+    def __init__(self, main_window=None, objectName=''):
         super().__init__()
         self.objectName = objectName
         self.main_window = main_window
         self.scroll_value = self.verticalScrollBar().minimum()
         self.scroll_constant = 100
+        self.setAttribute(qtc.Qt.WA_StyledBackground, True)
 
     def setObjectName(self, name):
         self.objectName = name
 
+    def set_main_window(self, main_window):
+        self.main_window = main_window
+
     def wheelEvent(self, event):
         if self.main_window.control_modifier:
-            event.ignore()
+            if event.angleDelta().y() == 120:
+                self.resized += 10
+                if self.resized >= 90: self.resized = 90
+                self.resize_image()
+                self.image_label.setPixmap(self.curr_img_pixmap)
+            elif event.angleDelta().y() == -120:
+                self.resized -= 10
+                if self.resized <= -90: self.resized = -90
+                self.resize_image()
+                self.image_label.setPixmap(self.curr_img_pixmap)
         else:
             self.scroll_(event.angleDelta().y())
 
@@ -54,7 +67,6 @@ class BrowserItemWidget(qtw.QWidget):
         self.index = index
         self.selected = False
         self.setAttribute(qtc.Qt.WA_StyledBackground, True)
-        self.setFocusPolicy(qtc.Qt.NoFocus)
         # self.setAttribute(qtc.Qt.WA_Hover, True)
         # self.setMouseTracking(True)
     

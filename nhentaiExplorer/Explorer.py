@@ -30,6 +30,8 @@ class Explorer(qtw.QWidget):
         self.layout().addWidget(self.search_box)
         self.layout().addWidget(self.browser_groupbox)
 
+        self.setFocusPolicy(qtc.Qt.NoFocus)
+
     def search(self):
         self.search_box = SearchBoxWidget()
         self.search_box.setFixedHeight(int(0.15*self.height()))
