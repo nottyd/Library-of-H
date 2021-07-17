@@ -7,10 +7,10 @@ from PyQt5 import QtGui as qtg
 from PyQt5 import QtCore as qtc
 from PIL import ImageQt, Image
 
-from nhentaiBrowser.Explorer import Explorer
-from nhentaiBrowser.CustomWidgets import Dock
-from nhentaiBrowser.CustomWidgets import ImageScrollArea
-from nhentaiBrowser.BrowserSettings import BrowserSettings
+from nhentaiExplorer.Explorer import Explorer
+from nhentaiExplorer.CustomWidgets import Dock
+from nhentaiExplorer.CustomWidgets import ImageScrollArea
+from nhentaiExplorer.ExplorerSettings import ExplorerSettings
 class MainWindow(qtw.QMainWindow):
 
     resize_constant = 10
@@ -34,14 +34,14 @@ class MainWindow(qtw.QMainWindow):
         self.main_widget.layout().addWidget(self.menu_widget)
         self.main_widget.layout().addWidget(self.main_window)
         self.main_widget.layout().setContentsMargins(0,0,0,0)
-        with open(r'.\nhentaiBrowser\stylesheet.css') as f:
+        with open(r'.\nhentaiExplorer\stylesheet.css') as f:
             # print(f.read())
             self.setStyleSheet(f.read())
             pass
         self.show()
 
     def last_session_settings(self):
-        setting = BrowserSettings()
+        setting = ExplorerSettings()
         if setting.Window__last_session_isMaximized.__get__():
             self.setWindowState(qtc.Qt.WindowMaximized)
         else:
@@ -206,12 +206,15 @@ class MainWindow(qtw.QMainWindow):
                 self.image_label.setPixmap(self.curr_img_pixmap)
 
     def closeEvent(self, event):
-        settings = BrowserSettings()
+        settings = ExplorerSettings()
         settings.Window__last_session_isMaximized.__set__(str(self.isMaximized()))
         settings.Window__last_session_height.__set__(self.height())
         settings.Window__last_session_width.__set__(self.width())
         settings.Window__last_session_x.__set__(self.x())
         settings.Window__last_session_y.__set__(self.y())
+
+        settings.Explorer__last_session_browser_selection.__set__()
+        settings.Explorer__last_session_browser_page.__set__(self.explorer.page_number_input.text())
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)

@@ -14,7 +14,7 @@ class SettingItems:
 class SettingDescriptor:
     def __init__(self, name):
         self._name = name
-        self.setting = QSettings(BrowserSettings.settings_file, QSettings.IniFormat)
+        self.setting = QSettings(ExplorerSettings.settings_file, QSettings.IniFormat)
 
     def __set__(self, value):
         self.setting.setValue(self._name.replace('__', '/'), value)
@@ -29,9 +29,9 @@ class SettingDescriptor:
             return value
 
 
-class BrowserSettings:
+class ExplorerSettings:
 
-    settings_file = './nhentaiBrowser/.BrowserSettings.conf'
+    settings_file = './nhentaiExplorer/.ExplorerSettings.conf'
 
     setting_defaults = [
         SettingItems('Window', 'last_session_isMaximized', 'False'),
@@ -44,15 +44,17 @@ class BrowserSettings:
         SettingItems('Viewer', 'last_session_page', 1),
         # SettingItems('Viewer', 'last_session_zoom', 0),
 
-        SettingItems('Explorer', 'last_session_import_file', 'None')
+        SettingItems('Explorer', 'last_session_import_file', 'None'),
+        SettingItems('Explorer', 'last_session_browser_page', 0),
+        SettingItems('Explorer', 'last_session_browser_selection', 0)
     ]
 
     def __init__(self):
-        self.setting = QSettings(BrowserSettings.settings_file, QSettings.IniFormat)
+        self.setting = QSettings(ExplorerSettings.settings_file, QSettings.IniFormat)
         for item in self.setting_defaults:
             attr_name = f'{item.section}__{item.option}'
             setattr(self, attr_name, SettingDescriptor(attr_name))
-        if not os.path.isfile(BrowserSettings.settings_file):
+        if not os.path.isfile(ExplorerSettings.settings_file):
             print('wtf')
             self.write_defaults()
         # print(self.Window__last_session_height)
@@ -76,7 +78,7 @@ class BrowserSettings:
         pass
 
 if __name__ == '__main__':
-    settings = BrowserSettings()
+    settings = ExplorerSettings()
     # settings.Window__last_session_height.__set__(600)
     # settings.Window__last_session_width.__set__(600)
     # settings.Window__last_session_x.__set__(600)

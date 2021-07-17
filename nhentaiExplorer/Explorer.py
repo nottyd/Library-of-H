@@ -6,7 +6,7 @@ from PyQt5 import QtCore as qtc
 from PIL import ImageQt, Image
 
 from nhentaiDownloader.nhentaiDBManager import nhentaiDBBrowser
-from nhentaiBrowser.CustomWidgets import BrowserItemWidget, SearchBoxWidget
+from nhentaiExplorer.CustomWidgets import BrowserItemWidget, SearchBoxWidget
 
 class Explorer(qtw.QWidget):
 
