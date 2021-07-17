@@ -10,7 +10,7 @@ from PIL import ImageQt, Image
 from nhentaiBrowser.Explorer import Explorer
 from nhentaiBrowser.CustomWidgets import Dock
 from nhentaiBrowser.CustomWidgets import ImageScrollArea
-
+from nhentaiBrowser.BrowserSettings import BrowserSettings
 class MainWindow(qtw.QMainWindow):
 
     resize_constant = 10
@@ -22,7 +22,7 @@ class MainWindow(qtw.QMainWindow):
         self.resized = 0
         super().__init__()
         self.setObjectName('MainWindow')
-        self.setGeometry(400, 400, 720, 500)
+        self.last_session_settings()
         self.main_widget = qtw.QWidget(objectName='W_Widget')
         self.main_widget.setLayout(qtw.QVBoxLayout())
         self.main_widget.layout().setSpacing(0)
@@ -34,11 +34,21 @@ class MainWindow(qtw.QMainWindow):
         self.main_widget.layout().addWidget(self.menu_widget)
         self.main_widget.layout().addWidget(self.main_window)
         self.main_widget.layout().setContentsMargins(0,0,0,0)
-        with open(r'B:\Learning\Python\MyScripts\nhentaiUtil\nhentaiUtils\nhentaiBrowser\stylesheet.css') as f:
+        with open(r'.\nhentaiBrowser\stylesheet.css') as f:
             # print(f.read())
             self.setStyleSheet(f.read())
             pass
         self.show()
+
+    def last_session_settings(self):
+        setting = BrowserSettings()
+        if setting.Window__last_session_isMaximized.__get__():
+            self.setWindowState(qtc.Qt.WindowMaximized)
+        else:
+            self.setGeometry(setting.Window__last_session_x.__get__(),
+                        setting.Window__last_session_y.__get__(),
+                        setting.Window__last_session_width.__get__(),
+                        setting.Window__last_session_height.__get__())
 
     def menubar(self):
         self.menu_widget = qtw.QWidget(objectName='W_Widget')
@@ -194,6 +204,14 @@ class MainWindow(qtw.QMainWindow):
                 if self.resized <= -90: self.resized = -90
                 self.resize_image()
                 self.image_label.setPixmap(self.curr_img_pixmap)
+
+    def closeEvent(self, event):
+        settings = BrowserSettings()
+        settings.Window__last_session_isMaximized.__set__(str(self.isMaximized()))
+        settings.Window__last_session_height.__set__(self.height())
+        settings.Window__last_session_width.__set__(self.width())
+        settings.Window__last_session_x.__set__(self.x())
+        settings.Window__last_session_y.__set__(self.y())
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)

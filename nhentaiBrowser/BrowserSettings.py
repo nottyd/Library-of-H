@@ -21,7 +21,12 @@ class SettingDescriptor:
         self.setting.sync()
     
     def __get__(self):
-        return self.setting.value(self._name.replace('__', '/'))
+        value = self.setting.value(self._name.replace('__', '/'))
+        try:
+            value = eval(value)
+            return value
+        except:
+            return value
 
 
 class BrowserSettings:
@@ -29,6 +34,7 @@ class BrowserSettings:
     settings_file = './nhentaiBrowser/.BrowserSettings.conf'
 
     setting_defaults = [
+        SettingItems('Window', 'last_session_isMaximized', 'False'),
         SettingItems('Window', 'last_session_height', 500),
         SettingItems('Window', 'last_session_width', 720),
         SettingItems('Window', 'last_session_x', 400),
@@ -47,6 +53,7 @@ class BrowserSettings:
             attr_name = f'{item.section}__{item.option}'
             setattr(self, attr_name, SettingDescriptor(attr_name))
         if not os.path.isfile(BrowserSettings.settings_file):
+            print('wtf')
             self.write_defaults()
         # print(self.Window__last_session_height)
         # self.load_config()
