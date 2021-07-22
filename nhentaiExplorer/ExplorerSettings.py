@@ -55,10 +55,8 @@ class ExplorerSettings:
             attr_name = f'{item.section}__{item.option}'
             setattr(self, attr_name, SettingDescriptor(attr_name))
         if not os.path.isfile(ExplorerSettings.settings_file):
-            print('wtf')
             self.write_defaults()
-        # print(self.Window__last_session_height)
-        # self.load_config()
+
 
     def write_defaults(self):
         groups = itertools.groupby(self.setting_defaults, lambda x: f'{x.section}/{x.option}')
