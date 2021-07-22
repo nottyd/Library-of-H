@@ -31,6 +31,7 @@ class MainWindow(qtw.QMainWindow):
         self.main_widget.layout().addWidget(self.menu_widget)
         self.main_widget.layout().addWidget(self.main_window)
         self.main_widget.layout().setContentsMargins(0,0,0,0)
+
         with open(r'.\nhentaiExplorer\stylesheet.css') as f:
             self.setStyleSheet(f.read())
             pass
