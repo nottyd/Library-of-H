@@ -6,23 +6,6 @@ import sys
 
 class nhentaiDBWriter:
     class nhentaiLibrary:
-        def create_database(self):
-            self.c.execute(""" CREATE TABLE IF NOT EXISTS nhentaiLibrary (
-                        ids INTEGER UNIQUE,
-                        titles TEXT,
-                        artists TEXT,
-                        groups TEXT,
-                        parodies TEXT,
-                        characters TEXT,
-                        languages TEXT,
-                        categories TEXT,
-                        pages INTEGER,
-                        upload_date TEXT,
-                        tags TEXT,
-                        location TEXT
-                        )""")
-            self.conn.commit()
-
         def set_database(self, database_location,  metadata_location, database_filename='nhentaiDatabase.db'):
             self.database_location = database_location
             self.metadata_location = metadata_location
@@ -44,6 +27,23 @@ class nhentaiDBWriter:
                 self.create_database()
                 for item in self.data_dict:
                     self.update_database(item, root)
+
+        def create_database(self):
+            self.c.execute(""" CREATE TABLE IF NOT EXISTS nhentaiLibrary (
+                        ids INTEGER UNIQUE,
+                        titles TEXT,
+                        artists TEXT,
+                        groups TEXT,
+                        parodies TEXT,
+                        characters TEXT,
+                        languages TEXT,
+                        categories TEXT,
+                        pages INTEGER,
+                        upload_date TEXT,
+                        tags TEXT,
+                        location TEXT
+                        )""")
+            self.conn.commit()
 
         def update_database(self, item, root):
             c = self.conn.cursor()

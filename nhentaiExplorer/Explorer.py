@@ -6,7 +6,7 @@ from PyQt5 import QtCore as qtc
 from PIL import ImageQt, Image
 
 from nhentaiDownloader.nhentaiDBManager import nhentaiDBBrowser
-from nhentaiBrowser.CustomWidgets import BrowserItemWidget, SearchBoxWidget
+from nhentaiExplorer.CustomWidgets import BrowserItemWidget, SearchBoxWidget
 
 class Explorer(qtw.QWidget):
 
@@ -29,6 +29,8 @@ class Explorer(qtw.QWidget):
         self.browser()
         self.layout().addWidget(self.search_box)
         self.layout().addWidget(self.browser_groupbox)
+
+        self.setFocusPolicy(qtc.Qt.NoFocus)
 
     def search(self):
         self.search_box = SearchBoxWidget()
