@@ -3,6 +3,9 @@ from PyQt5 import QtGui as qtg
 from PyQt5 import QtCore as qtc
 
 class ImageScrollArea(qtw.QScrollArea):
+
+    resized_constant = 10
+    
     def __init__(self, main_window=None, objectName=''):
         super().__init__()
         self.objectName = objectName
@@ -20,12 +23,12 @@ class ImageScrollArea(qtw.QScrollArea):
     def wheelEvent(self, event):
         if self.main_window.control_modifier:
             if event.angleDelta().y() == 120:
-                self.resized += 10
+                self.resized += ImageScrollArea.resized_constant
                 if self.resized >= 90: self.resized = 90
                 self.resize_image()
                 self.image_label.setPixmap(self.curr_img_pixmap)
             elif event.angleDelta().y() == -120:
-                self.resized -= 10
+                self.resized -= ImageScrollArea.resized_constant
                 if self.resized <= -90: self.resized = -90
                 self.resize_image()
                 self.image_label.setPixmap(self.curr_img_pixmap)
