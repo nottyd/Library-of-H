@@ -100,8 +100,8 @@ Choose a download method:
 Enter x to exit.
 >>
 ```
-# nhentaiBrowser  
-An image browser that uses the database file created by the downloader to view galleries. Basically create an (tiny) offline nhentai.net. _(WIP)_
+# nhentaiExplorer  
+An image explorer that uses the database file created by the downloader to view galleries. Basically create an (tiny) offline nhentai.net. _(WIP)_
 ## Import
 Import the `nhentaiDatabase.db` file created by the nhentaiDownloader script.
 ## Search
