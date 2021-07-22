@@ -1,12 +1,15 @@
 # Requirements
+- Windows: Works on Windows 10, not tested with other versions.  
+- Linux: Should work on Linux, not tested.
+- Python:
 ```
-python==3.x  
-colorama==0.3.9  
-mechanize==0.4.5  
-beautifulsoup4==4.9.3  
-Pillow==8.3.1  
-PyQt5==5.15.4  
-lxml==4.6.3  
+python          3.x  
+colorama        0.3.9  
+mechanize       0.4.5  
+beautifulsoup4  4.9.3  
+Pillow          8.3.1  
+PyQt5           5.15.4  
+lxml            4.6.3  
 ```
 
 # nhentaiDownloader  
