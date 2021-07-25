@@ -19,6 +19,7 @@ class MainWindow(qtw.QMainWindow):
         self.location = None
         self.control_modifier = False
         super().__init__()
+        self.setWindowTitle('nhentaiExplorer')
         self.setObjectName('MainWindow')
         self.main_widget = qtw.QWidget(objectName='W_Widget')
         self.main_widget.setLayout(qtw.QVBoxLayout())
