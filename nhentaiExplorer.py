@@ -9,6 +9,8 @@ from nhentaiExplorer.Explorer import Explorer
 from nhentaiExplorer.Viewer import Viewer
 from nhentaiExplorer.CustomWidgets import Dock
 from nhentaiExplorer.ExplorerSettings import ExplorerSettings
+from nhentaiExplorer.Search import Search
+from nhentaiExplorer.Browser import Browser
 
 
 class MainWindow(qtw.QMainWindow):
@@ -61,9 +63,23 @@ class MainWindow(qtw.QMainWindow):
         self.database_file_location = settings.Explorer__last_session_database_file.__get__()
         if self.database_file_location:
             self.set_database_file()
-        browser_page_number = settings.Explorer__last_session_browser_page.__get__()
-        if browser_page_number:
-            self.explorer.update_browser_page_number(page_number=browser_page_number)
+
+        # Search
+        last_session_browser_page = settings.Browser__last_session_browser_page.__get__()
+        last_session_filter_option = settings.Search__last_session_filter_option.__get__()
+        last_session_search_terms = settings.Search__last_session_search_terms.__get__()
+        if all(item for item in [last_session_filter_option, last_session_search_terms]):
+            self.search.search_edit.setText(', '.join(last_session_search_terms))
+            self.search.filter_option_combobox.setCurrentText(last_session_filter_option)
+            self.browser.set_filters(filter_options=last_session_filter_option, search_terms=last_session_search_terms, page_number=last_session_browser_page)
+        else:
+            # Browser
+            if last_session_browser_page:
+                self.browser.update_browser_page_number(page_number=last_session_browser_page)
+
+        last_session_browser_selection = settings.Browser__last_session_browser_selection.__get__()
+        if isinstance(last_session_browser_selection, int):
+            self.browser.selection_changed(index=last_session_browser_selection)
 
     def menubar(self):
         self.menu_widget = qtw.QWidget(objectName='W_Widget')
@@ -91,29 +107,40 @@ class MainWindow(qtw.QMainWindow):
         self.main_window.setCentralWidget(self.viewer)
 
     def create_explorer(self):
+        self.create_search()
+        self.create_browser()
+        self.search.SRCH_set_filters.connect(self.browser.set_filters)
+        self.explorer.layout().addWidget(self.search)
+        self.explorer.layout().addWidget(self.browser)
+
         self.dock = Dock('Explorer')
-        self.MW_import_signal.connect(lambda: self.explorer.change_search_box_state(True))
-        self.explorer.EXP_browser_item_width_signal.connect(lambda width: self.dock.setMaximumWidth(width+40))
-        self.explorer.EXP_viewer_change_signal.connect(self.viewer.change_viewer)
-        self.dock.setWidget(self.explorer)
+        self.MW_import_signal.connect(lambda: self.search.change_search_state(True))
+        self.browser.BRW_browser_item_width_signal.connect(lambda width: self.dock.setMaximumWidth(width+40))
+        self.browser.BRW_viewer_change_signal.connect(self.viewer.change_viewer)
         self.dock.setTitleBarWidget(qtw.QWidget())
         self.main_window.setFocusPolicy(qtc.Qt.StrongFocus)
         self.main_window.setFocus()
         self.main_window.addDockWidget(qtc.Qt.LeftDockWidgetArea, self.dock)
+        self.dock.setWidget(self.explorer)
+
+    def create_search(self):
+        self.search = Search()
+
+    def create_browser(self):
+        self.browser = Browser()
 
     def import_database(self):
         self.database_file_location = qtw.QFileDialog.getOpenFileName(self, 'Import database', os.path.abspath('.'), 'database files (*.db)')
         self.database_file_location = self.database_file_location[0]
-        if self.database_file_location == ('',''):
+        if not self.database_file_location:
             return
         else:
             self.set_database_file()
 
     def set_database_file(self):
-        self.explorer.set_database(self.database_file_location)
-        gallery_data_dict_list = self.explorer.get_items()
-        self.explorer.update_browser_page_number(page_number=1)
-        self.explorer.set_items(gallery_data_dict_list)
+        self.browser.set_database(self.database_file_location)
+        self.browser.update_browser_page_number(page_number=1)
+        self.browser.set_items(self.browser.get_items())
         self.MW_import_signal.emit()
 
     def show_hide_explorer(self):
@@ -154,13 +181,17 @@ class MainWindow(qtw.QMainWindow):
         settings.Window__last_session_y.__set__(self.y())
 
         # Explorer
-        # settings.Explorer__last_session_browser_selection.__set__()
-        settings.Explorer__last_session_browser_page.__set__(self.explorer.page_number_input.text())
+        settings.Browser__last_session_browser_selection.__set__(self.browser.current_browser_items_index)
+        settings.Browser__last_session_browser_page.__set__(self.browser.current_page_number)
         try:
             settings.Explorer__last_session_database_file.__set__(self.database_file_location)
         except AttributeError:
             pass
-        settings.Explorer__last_session_browser_page.__set__(self.explorer.curr_page_number)
+        settings.Browser__last_session_browser_page.__set__(self.browser.current_page_number)
+
+        # Search
+        settings.Search__last_session_filter_option.__set__(str(self.browser.filter_option))
+        settings.Search__last_session_search_terms.__set__(str(self.browser.search_terms))
 
         # Viewer
         try:
