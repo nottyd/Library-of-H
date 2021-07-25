@@ -41,12 +41,16 @@ class ExplorerSettings:
         SettingItems('Window', 'last_session_y', 400),
 
         SettingItems('Viewer', 'last_session_image', 'None'),
-        SettingItems('Viewer', 'last_session_page', 1),
+        SettingItems('Viewer', 'last_session_page', 'None'),
         # SettingItems('Viewer', 'last_session_zoom', 0),
 
         SettingItems('Explorer', 'last_session_database_file', 'None'),
-        SettingItems('Explorer', 'last_session_browser_page', 0),
-        SettingItems('Explorer', 'last_session_browser_selection', 0)
+
+        SettingItems('Search', 'last_session_filter_option', 'None'),
+        SettingItems('Search', 'last_session_search_terms', 'None'),
+
+        SettingItems('Browser', 'last_session_browser_page', 'None'),
+        SettingItems('Browser', 'last_session_browser_selection', 'None')
     ]
 
     def __init__(self):
