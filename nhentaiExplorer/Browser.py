@@ -74,8 +74,8 @@ class Browser(qtw.QGroupBox):
         self.browser_pages_widget.layout().addWidget(self.right_btn)
         self.browser_pages_widget.layout().addWidget(self.last_btn)
 
-    def set_filters(self, filter_options, search_terms,page_number=1):
-        self.filter_option = filter_options
+    def set_filters(self, filter_option=None, search_terms=None, page_number=1):
+        self.filter_option = filter_option
         self.search_terms = search_terms
         self.update_browser_page_number(page_number=page_number)
         # self.set_items(self.get_items())

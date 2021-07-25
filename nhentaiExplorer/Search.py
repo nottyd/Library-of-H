@@ -6,7 +6,7 @@ from nhentaiExplorer.CustomWidgets import SearchBoxWidget
 
 class Search(SearchBoxWidget):
 
-    SRCH_set_filters = qtc.pyqtSignal(str, list)
+    SRCH_set_filters = qtc.pyqtSignal(object, object)
     btn_disabled_css = 'background: #772538; color: #757575;'
     btn_enabled_css = 'background-color: #ed2553; color: #fdf8ff;'
 
@@ -31,10 +31,14 @@ class Search(SearchBoxWidget):
         self.filter_option_combobox.setCurrentIndex(0)
 
         self.search_btn = qtw.QPushButton('Search', clicked=self.set_filters, objectName='EXP_PushButton')
+        self.reset_btn = qtw.QPushButton('Reset', clicked=self.reset_filters, objectName='EXP_PushButton')
         self.search_btn.setEnabled(False)
         self.search_btn.setStyleSheet(self.btn_disabled_css)
+        self.reset_btn.setEnabled(False)
+        self.reset_btn.setStyleSheet(self.btn_disabled_css)
         search_bar.addWidget(self.filter_option_combobox)
         search_bar.addWidget(self.search_btn)
+        search_bar.addWidget(self.reset_btn)
         self.layout().addRow(self.search_edit)
         self.layout().addRow(search_bar)
 
@@ -50,16 +54,23 @@ class Search(SearchBoxWidget):
     def change_search_state(self, setEnabled=False):
         self.search_edit.setEnabled(setEnabled)
         self.search_btn.setEnabled(setEnabled)
+        self.reset_btn.setEnabled(setEnabled)
         self.filter_option_combobox.setEnabled(setEnabled)
         if setEnabled:
             self.search_btn.setStyleSheet(self.btn_enabled_css)
+            self.reset_btn.setStyleSheet(self.btn_enabled_css)
         else:
             self.search_btn.setStyleSheet(self.btn_disabled_css)
+            self.reset_btn.setStyleSheet(self.btn_disabled_css)
 
     def set_filters(self):
         filter_option = self.filter_option_combobox.currentText()
         search_terms = [search_term.strip().replace(' ', '-') for search_term in self.search_edit.text().split(',')]
-        if self.search_terms == '':
-            filter_option=None
-            search_terms=None
+        if search_terms == ['']:
+            self.SRCH_set_filters.emit(None, None)
+            return
         self.SRCH_set_filters.emit(filter_option, search_terms)
+
+    def reset_filters(self):
+        self.search_edit.setText('')
+        self.SRCH_set_filters.emit(None, None)
