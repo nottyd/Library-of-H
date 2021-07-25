@@ -71,7 +71,7 @@ class MainWindow(qtw.QMainWindow):
         if all(item for item in [last_session_filter_option, last_session_search_terms]):
             self.search.search_edit.setText(', '.join(last_session_search_terms))
             self.search.filter_option_combobox.setCurrentText(last_session_filter_option)
-            self.browser.set_filters(filter_options=last_session_filter_option, search_terms=last_session_search_terms, page_number=last_session_browser_page)
+            self.browser.set_filters(filter_option=last_session_filter_option, search_terms=last_session_search_terms, page_number=last_session_browser_page)
         else:
             # Browser
             if last_session_browser_page:
