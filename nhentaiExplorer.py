@@ -140,7 +140,7 @@ class MainWindow(qtw.QMainWindow):
     def set_database_file(self):
         self.browser.set_database(self.database_file_location)
         self.browser.update_browser_page_number(page_number=1)
-        self.browser.set_items(self.browser.get_items())
+        self.browser.create_items(self.browser.get_items())
         self.MW_import_signal.emit()
 
     def show_hide_explorer(self):

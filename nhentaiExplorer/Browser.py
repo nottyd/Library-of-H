@@ -78,7 +78,7 @@ class Browser(qtw.QGroupBox):
         self.filter_option = filter_option
         self.search_terms = search_terms
         self.update_browser_page_number(page_number=page_number)
-        # self.set_items(self.get_items())
+        # self.create_items(self.get_items())
 
     def set_database(self, location):
         self.offset = 0
@@ -113,7 +113,7 @@ class Browser(qtw.QGroupBox):
         } for result in results]
         return gallery_data_dict_list
 
-    def set_items(self, gallery_data_dict_list):
+    def create_items(self, gallery_data_dict_list):
         self.browser_widget = qtw.QWidget()
         self.browser_scrollarea.setWidget(self.browser_widget)
         self.browser_scrollarea.setWidgetResizable(True)
@@ -123,16 +123,21 @@ class Browser(qtw.QGroupBox):
         self.browser_widget.layout().setSpacing(0)
         self.browser_widget.layout().setContentsMargins(0,0,0,0)
         self.browser_items = [BrowserItemWidget() for i in range(len(gallery_data_dict_list))]
+        threads = []
+
         for index, gallery_data_dict in enumerate(gallery_data_dict_list):
             browser_item = self.browser_items[index]
             browser_item.setMinimumHeight(240)
             location = gallery_data_dict['location']
-            browser_item.set_location(location=location)
+            threads.append(ResizeThumbnail(location))
+            # threads[-1].start()
+            # browser_item.set_location(location=location)
             browser_item.set_index(index=index)
             browser_item.BIW_viewer_change_signal.connect(self.selection_changed)
             browser_item.setLayout(qtw.QHBoxLayout())
             browser_item.BIW_hover_signal.connect(lambda mode, index: self.hover_event(mode, index))
             browser_item.setStyleSheet('background: #1f1f1f')
+        
             description = qtw.QScrollArea()
             description.verticalScrollBar().hide()
             description.horizontalScrollBar().hide()
@@ -140,22 +145,36 @@ class Browser(qtw.QGroupBox):
             self.create_metadata(gallery_data_dict)
             # text = qtw.QLabel(self.create_metadata(gallery_data_dict))
             description.setWidget(self.metadata_widget)
-            thumbnail = Image.open(os.path.join(location, sorted(os.listdir(location))[0]))
-            thumbnail = thumbnail.convert('RGB')
-            # thumbnail.thumbnail((250,250), Image.BOX)
-            thumbnail = ImageQt.ImageQt(thumbnail)
-            thumbnail_pixmap = qtg.QPixmap.fromImage(thumbnail)
-            thumbnail_pixmap = thumbnail_pixmap.scaled(150, 200, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation)
-            thumb = qtw.QLabel(pixmap=thumbnail_pixmap)
-            # text.setFixedWidth(int(browser_scrollarea.width()*50/100))
-            browser_item.layout().addWidget(thumb)
-            browser_item.layout().addWidget(description)
+
+            thumbnail = qtw.QLabel()
+            loading_gif = qtg.QMovie(r'B:\My Scripts\Library-of-H\assets\Loading.gif')
+            thumbnail.setMovie(loading_gif)
+            loading_gif.start()
+
+
             self.browser_widget.layout().addWidget(browser_item)
-            index += 1
-        try:
-            self.BRW_browser_item_width_signal.emit(browser_item.width())
-        except UnboundLocalError:
-            pass
+            browser_item.layout().addWidget(thumbnail)
+            browser_item.layout().addWidget(description)
+
+    # def set_items(self, gallery_data_dict_list):
+    #     for index, gallery_data_dict in enumerate(gallery_data_dict_list):
+
+    #         thumbnail = Image.open(os.path.join(location, sorted(os.listdir(location))[0]))
+    #         thumbnail = thumbnail.convert('RGB')
+    #         thumbnail.thumbnail((150,200), Image.BOX)
+    #         thumbnail = ImageQt.ImageQt(thumbnail)
+    #         thumbnail_pixmap = qtg.QPixmap.fromImage(thumbnail)
+    #         # thumbnail_pixmap = thumbnail_pixmap.scaled(150, 200, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation)
+    #         thumb = qtw.QLabel(pixmap=thumbnail_pixmap)
+    #         # text.setFixedWidth(int(browser_scrollarea.width()*50/100))
+    #         browser_item.layout().addWidget(thumb)
+    #         browser_item.layout().addWidget(description)
+    #         self.browser_widget.layout().addWidget(browser_item)
+    #         index += 1
+    #     try:
+    #         self.BRW_browser_item_width_signal.emit(browser_item.width())
+    #     except UnboundLocalError:
+    #         pass
 
     def selection_changed(self, location=None, index=0):
         for item in self.browser_items:
@@ -232,7 +251,7 @@ class Browser(qtw.QGroupBox):
             self.current_page_number = self.max_page_numbers
         self.change_offset()
         gallery_data_dict_list = self.get_items()
-        self.set_items(gallery_data_dict_list)
+        self.create_items(gallery_data_dict_list)
         self.update_browser_page_number()
 
     def change_btn_state(self, first=False, left=False, right=False, last=False):
@@ -263,7 +282,7 @@ class Browser(qtw.QGroupBox):
             self.current_page_number = page_number
             self.change_offset()
             gallery_data_dict_list = self.get_items()
-            self.set_items(gallery_data_dict_list)
+            self.create_items(gallery_data_dict_list)
             self.page_number_input.setText(str(self.current_page_number))
             self.page_number_label.setText(f'/ {self.max_page_numbers}')
         page_number = int(self.page_number_input.text())
@@ -272,7 +291,7 @@ class Browser(qtw.QGroupBox):
                 self.current_page_number = page_number
                 self.change_offset()
                 gallery_data_dict_list = self.get_items()
-                self.set_items(gallery_data_dict_list)
+                self.create_items(gallery_data_dict_list)
         self.page_number_input.setText(str(self.current_page_number))
 
     def change_offset(self):
@@ -303,3 +322,13 @@ class Browser(qtw.QGroupBox):
             self.browser_items[index].layout().itemAt(1).widget().setStyleSheet('background: #1f1f1f;')
             self.browser_items[index].layout().itemAt(1).widget().verticalScrollBar().hide()
             self.browser_items[index].layout().itemAt(1).widget().horizontalScrollBar().hide()
+
+class ResizeThumbnail(qtc.QThread):
+
+    resize_done = qtc.pyqtSignal(qtg.QImage)
+    def __init__(self, location):
+        super().__init__()
+        self.location = location
+    
+    def run(self):
+        print(self.location)
