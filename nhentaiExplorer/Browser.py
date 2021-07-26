@@ -1,4 +1,5 @@
 import os
+import time
 
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtGui as qtg
@@ -11,6 +12,7 @@ from nhentaiDownloader.nhentaiDBManager import nhentaiDBBrowser
 
 class Browser(qtw.QGroupBox):
 
+    QThread_resize_request = qtc.pyqtSignal(str, int)
     BRW_viewer_change_signal = qtc.pyqtSignal(str)
     BRW_browser_item_width_signal = qtc.pyqtSignal(int)
     btn_disabled_css = 'background: #772538; color: #757575;'
@@ -25,6 +27,15 @@ class Browser(qtw.QGroupBox):
         self.filter_option = None
         self.search_terms = None
         self.current_browser_items_index = 0
+
+        self.worker = Worker()
+        self.worker_thread = qtc.QThread()
+
+        self.worker.moveToThread(self.worker_thread)
+        self.worker_thread.start()
+
+        self.QThread_resize_request.connect(self.worker.resize_image)
+        self.worker.QThread_resized.connect(self.update_thumbnail_labels)
     
         self.browser()
 
@@ -123,15 +134,13 @@ class Browser(qtw.QGroupBox):
         self.browser_widget.layout().setSpacing(0)
         self.browser_widget.layout().setContentsMargins(0,0,0,0)
         self.browser_items = [BrowserItemWidget() for i in range(len(gallery_data_dict_list))]
-        threads = []
 
         for index, gallery_data_dict in enumerate(gallery_data_dict_list):
             browser_item = self.browser_items[index]
             browser_item.setMinimumHeight(240)
             location = gallery_data_dict['location']
-            threads.append(ResizeThumbnail(location))
-            # threads[-1].start()
-            # browser_item.set_location(location=location)
+            self.QThread_resize_request.emit(location, index)
+            browser_item.set_location(location=location)
             browser_item.set_index(index=index)
             browser_item.BIW_viewer_change_signal.connect(self.selection_changed)
             browser_item.setLayout(qtw.QHBoxLayout())
@@ -156,25 +165,14 @@ class Browser(qtw.QGroupBox):
             browser_item.layout().addWidget(thumbnail)
             browser_item.layout().addWidget(description)
 
-    # def set_items(self, gallery_data_dict_list):
-    #     for index, gallery_data_dict in enumerate(gallery_data_dict_list):
+            try:
+                self.BRW_browser_item_width_signal.emit(browser_item.width())
+            except UnboundLocalError:
+                pass
 
-    #         thumbnail = Image.open(os.path.join(location, sorted(os.listdir(location))[0]))
-    #         thumbnail = thumbnail.convert('RGB')
-    #         thumbnail.thumbnail((150,200), Image.BOX)
-    #         thumbnail = ImageQt.ImageQt(thumbnail)
-    #         thumbnail_pixmap = qtg.QPixmap.fromImage(thumbnail)
-    #         # thumbnail_pixmap = thumbnail_pixmap.scaled(150, 200, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation)
-    #         thumb = qtw.QLabel(pixmap=thumbnail_pixmap)
-    #         # text.setFixedWidth(int(browser_scrollarea.width()*50/100))
-    #         browser_item.layout().addWidget(thumb)
-    #         browser_item.layout().addWidget(description)
-    #         self.browser_widget.layout().addWidget(browser_item)
-    #         index += 1
-    #     try:
-    #         self.BRW_browser_item_width_signal.emit(browser_item.width())
-    #     except UnboundLocalError:
-    #         pass
+    def update_thumbnail_labels(self, pixmap, index):
+        self.browser_items[index].layout().itemAt(0).widget().clear()
+        self.browser_items[index].layout().itemAt(0).widget().setPixmap(pixmap)
 
     def selection_changed(self, location=None, index=0):
         for item in self.browser_items:
@@ -323,12 +321,15 @@ class Browser(qtw.QGroupBox):
             self.browser_items[index].layout().itemAt(1).widget().verticalScrollBar().hide()
             self.browser_items[index].layout().itemAt(1).widget().horizontalScrollBar().hide()
 
-class ResizeThumbnail(qtc.QThread):
+class Worker(qtc.QObject):
 
-    resize_done = qtc.pyqtSignal(qtg.QImage)
-    def __init__(self, location):
-        super().__init__()
-        self.location = location
-    
-    def run(self):
-        print(self.location)
+    QThread_resized = qtc.pyqtSignal(qtg.QPixmap, int)
+
+    def resize_image(self, location, index):
+        thumbnail = Image.open(os.path.join(location, sorted(os.listdir(location))[0]))
+        thumbnail = thumbnail.convert('RGB')
+        # thumbnail.thumbnail((150,200), Image.BOX)
+        thumbnail_qt = ImageQt.ImageQt(thumbnail)
+        thumbnail_pixmap = qtg.QPixmap.fromImage(thumbnail_qt)
+        thumbnail_pixmap = thumbnail_pixmap.scaled(150, 200, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation)
+        self.QThread_resized.emit(thumbnail_pixmap, index)
