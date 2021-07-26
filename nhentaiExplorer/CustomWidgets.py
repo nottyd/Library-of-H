@@ -102,3 +102,21 @@ class SearchBoxWidget(qtw.QWidget):
     def keyPressEvent(self, event):
         if event.key() == qtc.Qt.Key_Return or event.key() == qtc.Qt.Key_Enter:
             self.returnPressed.emit()
+
+
+class QPushButton(qtw.QPushButton):
+    def __init__(self, text=None, clicked=None, objectName=None):
+        super().__init__()
+        self.setText(text)
+        self.clicked.connect(clicked)
+        self.setObjectName(None)
+        self.setFocusPolicy(qtc.Qt.NoFocus)
+
+
+class WorkerThread(qtc.QThread):
+    def __init__(self):
+        super().__init__()
+
+    def stop(self):
+        self.quit()
+        self.wait()

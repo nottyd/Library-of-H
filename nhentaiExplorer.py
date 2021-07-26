@@ -16,6 +16,7 @@ from nhentaiExplorer.Browser import Browser
 class MainWindow(qtw.QMainWindow):
 
     MW_import_signal = qtc.pyqtSignal()
+    MW_close_signal = qtc.pyqtSignal()
 
     def __init__(self):
         self.location = None
@@ -128,6 +129,7 @@ class MainWindow(qtw.QMainWindow):
 
     def create_browser(self):
         self.browser = Browser()
+        self.MW_close_signal.connect(self.browser.QThread_close.emit)
 
     def import_database(self):
         self.database_file_location = qtw.QFileDialog.getOpenFileName(self, 'Import database', os.path.abspath('.'), 'database files (*.db)')
@@ -172,6 +174,7 @@ class MainWindow(qtw.QMainWindow):
             self.control_modifier = False
 
     def closeEvent(self, event):
+        self.MW_close_signal.emit()
         settings = ExplorerSettings()
         # Window
         settings.Window__last_session_isMaximized.__set__(str(self.isMaximized()))

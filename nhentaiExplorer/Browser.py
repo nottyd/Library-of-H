@@ -7,11 +7,14 @@ from PyQt5 import QtCore as qtc
 from PIL import ImageQt, Image
 
 from nhentaiExplorer.CustomWidgets import BrowserItemWidget
+from nhentaiExplorer.CustomWidgets import QPushButton
+from nhentaiExplorer.CustomWidgets import WorkerThread
 from nhentaiDownloader.nhentaiDBManager import nhentaiDBBrowser
 
 
 class Browser(qtw.QGroupBox):
 
+    QThread_close = qtc.pyqtSignal()
     QThread_resize_request = qtc.pyqtSignal(str, int)
     BRW_viewer_change_signal = qtc.pyqtSignal(str)
     BRW_browser_item_width_signal = qtc.pyqtSignal(int)
@@ -20,7 +23,7 @@ class Browser(qtw.QGroupBox):
 
     def __init__(self):
         super().__init__()
-        self.limit = 7
+        self.limit = 5
         self.offset = 0
         self.max_page_numbers = 0
         self.current_page_number = 0
@@ -29,13 +32,15 @@ class Browser(qtw.QGroupBox):
         self.current_browser_items_index = 0
 
         self.worker = Worker()
-        self.worker_thread = qtc.QThread()
+        self.worker_thread = WorkerThread()
 
         self.worker.moveToThread(self.worker_thread)
         self.worker_thread.start()
 
         self.QThread_resize_request.connect(self.worker.resize_image)
         self.worker.QThread_resized.connect(self.update_thumbnail_labels)
+
+        self.QThread_close.connect(self.worker_thread.stop)
     
         self.browser()
 
@@ -67,10 +72,10 @@ class Browser(qtw.QGroupBox):
         self.browser_pages_widget = qtw.QWidget(objectName='browser_pages_widget')
         self.browser_pages_widget.setLayout(qtw.QHBoxLayout())
         self.browser_pages_widget.setFocusPolicy(qtc.Qt.NoFocus)
-        self.left_btn = qtw.QPushButton('<', clicked=lambda: self.prev_next_btn_clicked(mode='<'), objectName='EXP_PushButton')
-        self.right_btn = qtw.QPushButton('>', clicked=lambda: self.prev_next_btn_clicked(mode='>'), objectName='EXP_PushButton')
-        self.first_btn = qtw.QPushButton('<<', clicked=lambda: self.prev_next_btn_clicked(mode='<<'), objectName='EXP_PushButton')
-        self.last_btn = qtw.QPushButton('>>', clicked=lambda: self.prev_next_btn_clicked(mode='>>'), objectName='EXP_PushButton')
+        self.left_btn = QPushButton('<', clicked=lambda: self.prev_next_btn_clicked(mode='<'), objectName='EXP_PushButton')
+        self.right_btn = QPushButton('>', clicked=lambda: self.prev_next_btn_clicked(mode='>'), objectName='EXP_PushButton')
+        self.first_btn = QPushButton('<<', clicked=lambda: self.prev_next_btn_clicked(mode='<<'), objectName='EXP_PushButton')
+        self.last_btn = QPushButton('>>', clicked=lambda: self.prev_next_btn_clicked(mode='>>'), objectName='EXP_PushButton')
         self.change_btn_state(False, False, False, False)
         self.page_number_input = qtw.QLineEdit('0', alignment=qtc.Qt.AlignCenter, objectName='EXP_LineEdit')
         self.page_number_input.setEnabled(False)
@@ -171,8 +176,13 @@ class Browser(qtw.QGroupBox):
                 pass
 
     def update_thumbnail_labels(self, pixmap, index):
-        self.browser_items[index].layout().itemAt(0).widget().clear()
-        self.browser_items[index].layout().itemAt(0).widget().setPixmap(pixmap)
+        try:
+            self.browser_items[index].layout().itemAt(0).widget().clear()
+            self.browser_items[index].layout().itemAt(0).widget().setPixmap(pixmap)
+        except IndexError:
+            pass
+        except Exception as e:
+            print(e)
 
     def selection_changed(self, location=None, index=0):
         for item in self.browser_items:
