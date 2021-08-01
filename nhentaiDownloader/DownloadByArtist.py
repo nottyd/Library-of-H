@@ -18,7 +18,7 @@ class DownloadByArtist:
         self.invalid_codes = []
         self.name_too_long = dict()
 
-    def artist_galleries_downloader(self, gallery_codes, artist_name, config, gallery_folder=None):
+    def artist_galleries_downloader(self, gallery_codes, artist_name, config, gallery_folder=None) -> None:
         for gallery_code in gallery_codes:
             get_links_and_title_res = Helper.get_links_and_title(gallery_code, artist_name=artist_name)
             if not isinstance(get_links_and_title_res[0], list):
@@ -48,13 +48,7 @@ class DownloadByArtist:
                 os.chdir(self.save_dest)
             print()
 
-            try:
-                gallery_folder = None
-                del(translated_title, original_title, gallery_title)
-            except UnboundLocalError as e:
-                continue
-
-    def download_by_artist(self, config):
+    def download_by_artist(self, config) -> None:
         for artist in self.artists:
             filter_ = GalleriesFilter(config, type_='artist')
             try:

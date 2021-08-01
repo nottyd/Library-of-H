@@ -35,14 +35,14 @@ class nhentaiConfig:
         ConfigItems('DownloadSettings', 'overwrite', False)
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         for item in self.config_default:
             setattr(self, f'default_{item.option}', item.default)
         if not os.path.isfile(os.path.join(_config_file_location, 'nhentaiConfig.ini')):
             self.write_config()
         self.load_config()
 
-    def write_config(self):
+    def write_config(self) -> None:
         config = configparser.RawConfigParser()
         groups = itertools.groupby(self.config_default, lambda x: x.section)
         for k, g in groups:
@@ -52,7 +52,7 @@ class nhentaiConfig:
         with open(os.path.join(_config_file_location, 'nhentaiConfig.ini'), 'w') as f:
             config.write(f)
     
-    def load_config(self):
+    def load_config(self) -> None:
         config = configparser.RawConfigParser()
         config.read(os.path.join(_config_file_location, 'nhentaiConfig.ini'))
         for item, value in config.items():
@@ -69,7 +69,7 @@ class nhentaiConfig:
                             setattr(self, i, v.strip())
         self.config_checker()
 
-    def config_checker(self):
+    def config_checker(self) -> None:
         if not isinstance(self.collection, bool):
             sys.exit('Error loading collection preferences from nhentaiConfig.ini, only accepted values are True or False.')
         if not isinstance(self.duplicate, bool):

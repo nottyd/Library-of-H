@@ -1,5 +1,5 @@
-import sys
 import os
+from typing import Union
 
 import nhentaiDownloader.nhentaiHelper as Helper
 from nhentaiDownloader.nhentaiMetadataHandler import MetadataHandler
@@ -13,10 +13,10 @@ class GalleriesFilter:
         self.codes_and_metadata = dict()
 
 # Function to create a {'gallery_title': [metadata]} dictionary for each gallery code found in each artist page
-    def metadata_getter(self, gallery_code):
+    def metadata_getter(self, gallery_code) -> None:
         self.codes_and_metadata[gallery_code] = MetadataGetter(gallery_code)
 
-    def filter_galleries_titles_getter(self, gallery_codes, type_ = None):
+    def filter_galleries_titles_getter(self, gallery_codes, type_ = None) -> None:
         if type_ is None: type_=self.type_
         gallery_metadata_dict = {}
         print(f'Collecting metadata for {type_} galleries...')
@@ -45,8 +45,7 @@ class GalleriesFilter:
                     if gallery_code not in self.filtered_gallery_codes:
                         self.filtered_gallery_codes.append(gallery_code)
 
-
-    def filter_galleries_getter(self, pages, url, type_=None):
+    def filter_galleries_getter(self, pages, url, type_=None) -> Union [None, list]:
         if type_ is None: type_=self.type_
         self.filtered_gallery_codes = list()
         gallery_codes = []
@@ -94,7 +93,7 @@ class GalleriesFilter:
             print(f"{len_gallery_codes}/{len_gallery_codes} have previously been filtered out as duplicates.\n")
 
     # Function to filter already downloaded galleries
-    def check_database(self, filter_option, search_term, get, table, order_by, order_in='ASC'):
+    def check_database(self, filter_option, search_term, get, table, order_by, order_in='ASC') -> Union[list, bool]:
         if os.path.isdir(self.config.databaselocation):
             database_location = self.config.databaselocation
         else:
@@ -116,7 +115,7 @@ class GalleriesFilter:
             return False
 
     class CollectionsFilter:
-        def __init__(self, gallery_metadata_dict, codes_and_metadata, config):
+        def __init__(self, gallery_metadata_dict, codes_and_metadata, config) -> None:
             self.config = config
             self.codes_and_metadata = codes_and_metadata
             self.collections_count = 0
@@ -129,10 +128,10 @@ class GalleriesFilter:
             self.nhen_DBW_f.set_database(database_location=database_location, database_filename='nhentaiDatabase.db')
             self.gallery_metadata_dict = self.comic_galleries_filter(gallery_metadata_dict)
         
-        def get_items(self):
+        def get_items(self) -> tuple:
             return self.gallery_metadata_dict, self.collections_count
 
-        def anthology_galleries_filter(self, gallery_metadata_dict):
+        def anthology_galleries_filter(self, gallery_metadata_dict) -> dict:
             titles_to_del = set()
             for gallery_title, gallery_metadata in gallery_metadata_dict.items():
                 codes_to_del = set()
@@ -155,7 +154,7 @@ class GalleriesFilter:
             return gallery_metadata_dict
 
 
-        def comic_galleries_filter(self, gallery_metadata_dict):
+        def comic_galleries_filter(self, gallery_metadata_dict) -> dict:
             titles_to_del = set()
             for gallery_title, gallery_metadata in gallery_metadata_dict.items():
                 codes_to_del = set()
@@ -177,7 +176,7 @@ class GalleriesFilter:
 
 
     class DuplicatesFilter:
-        def __init__(self, codes_and_metadata, filtered_gallery_codes, config):
+        def __init__(self, codes_and_metadata, filtered_gallery_codes, config) -> None:
             self.config = config
             self.codes_and_metadata = codes_and_metadata
             self.filtered_gallery_codes = filtered_gallery_codes
@@ -189,7 +188,7 @@ class GalleriesFilter:
                 database_location = self.config.default_databaselocation
             self.nhen_DBW_f.set_database(database_location=database_location, database_filename='nhentaiDatabase.db')
 
-        def page_discrepancy(self, pages_dict):
+        def page_discrepancy(self, pages_dict) -> Union[str, list]:
             pages_list = sorted(list(pages_dict.values()))
             if max(pages_list) - min(pages_list) <= 6:
                 return 'all_same'
@@ -203,7 +202,7 @@ class GalleriesFilter:
                 else:
                     return similar_galleries
 
-        def pages_filter(self, gallery_codes, rec=0):
+        def pages_filter(self, gallery_codes, rec=0) -> None:
             pages_dict = {}
             duplicate_pages_dict = {}
             page_discrepancy_result = None
@@ -237,7 +236,7 @@ class GalleriesFilter:
                     self.pages_filter(values, rec=1)
                 self.pages_filter(list(pages_dict.keys()), rec=2)
 
-        def languages_filter(self, gallery_codes):
+        def languages_filter(self, gallery_codes) -> None:
             gallery_language_dict = {gallery_code: self.codes_and_metadata[gallery_code].languages for gallery_code in gallery_codes}
             to_dels = set()
             gallery_codes = list(gallery_language_dict.keys())
@@ -272,7 +271,7 @@ class GalleriesFilter:
                     duplicate_codes = [gallery_code_ for gallery_code_ in gallery_language_dict.keys() if gallery_code_ != gallery_code]
                     self.nhen_DBW_f.update_database(downloaded_code=gallery_code, duplicate_codes=duplicate_codes)
 
-        def duplicate_galleries_handler(self, gallery_metadata_dict):
+        def duplicate_galleries_handler(self, gallery_metadata_dict) -> list:
             for gallery_title, gallery_metadata in gallery_metadata_dict.items():
                 if len(gallery_metadata[2]) > 1:
                     self.pages_filter(gallery_metadata[2])
@@ -283,7 +282,7 @@ class GalleriesFilter:
 
 
 class MetadataGetter:
-    def __init__(self, gallery_code):
+    def __init__(self, gallery_code) -> None:
         metadata = MetadataHandler(gallery_code)
         self.pages = metadata.pages_getter()
         self.artists = metadata.artists_getter()
