@@ -3,6 +3,7 @@ import re
 import time
 import itertools
 import logging
+from typing import Union
 
 import mechanize
 from bs4 import BeautifulSoup
@@ -13,7 +14,7 @@ from nhentaiDownloader.nhentaiConfig import nhentaiConfig
 
 config = nhentaiConfig()
 
-def log_and_print(error_family=None, error_type=None, error=None, error_msg='', gallery_title=None, original_title=None, download_type=None, cont_default=None, retry=None):
+def log_and_print(error_family=None, error_type=None, error=None, error_msg='', gallery_title=None, original_title=None, download_type=None, cont_default=None, retry=None) -> None:
     if error_msg != '':
         print(error_msg)
         return
@@ -51,20 +52,18 @@ def log_and_print(error_family=None, error_type=None, error=None, error_msg='', 
         if cont_default:
             error_msg += f'\n{colorama.Fore.RED}Continuing with defaults: {colorama.Fore.BLUE}{defaults}'
 
-
-
     error_msg += '\n'
     print(error_msg)
 
 # Funcction to create Browser object
-def browser_factory():
+def browser_factory() -> mechanize.Browser:
     br = mechanize.Browser()
     br.set_handle_robots(False)
     request = get_request('https://www.nhentai.net')
     return br
 
 # Function to create beautifulsoup object
-def soup_maker(url):
+def soup_maker(url) -> Union[BeautifulSoup, str]:
     request = get_request(url)
     response = get_response_with_retry(request)
     if str(type(response)) == "<class 'mechanize._response.response_seek_wrapper'>":
@@ -76,7 +75,7 @@ def soup_maker(url):
     return soup
 
 # Function to get response with mechanize and retry 3 times
-def get_response_with_retry(request):
+def get_response_with_retry(request) -> Union[int, None, mechanize._response.response_seek_wrapper]:
     errno = 0
     br = browser_factory()
     for i in range(config.retry+1):
@@ -134,12 +133,12 @@ def get_response_with_retry(request):
     return None
 
 # Function to get request
-def get_request(url):
+def get_request(url) -> mechanize._request.Request:
     return mechanize.Request(url, None, {'User-Agent':config.useragent})
 
 # Functions for printing progress
 # Function for printing bar progress: [########-------]
-def print_bar_progress(bar_length=20, total=20, progress=1, msg=None):
+def print_bar_progress(bar_length=20, total=20, progress=1, msg=None) -> None:
     if total == 0: total = 1
     done = (progress*100)/total
     done = int((done/100)*bar_length)
@@ -148,7 +147,7 @@ def print_bar_progress(bar_length=20, total=20, progress=1, msg=None):
         print()
 
 # Function for converting list of thumbnail links to list of actual image links.
-def link_converter(image_links):  
+def link_converter(image_links) -> list:
     t_image_links = [re.sub('https://t.nhentai.net/galleries/', 'https://i.nhentai.net/galleries/', image_link) for image_link in image_links]
     image_links = t_image_links
     t_image_links = [re.sub('t', '', image_link[::-1], count=1) for image_link in image_links]
@@ -157,7 +156,7 @@ def link_converter(image_links):
     return list(image_links)
 
 # Function for creating a list of thumbnail links.
-def links_and_title_getter(gallery_code, filter_call=False):
+def links_and_title_getter(gallery_code, filter_call=False) -> Union[tuple, str]:
     gallery_url = 'https://www.nhentai.net/g/{}'.format(gallery_code)
     soup = soup_maker(gallery_url)
     try:
@@ -185,7 +184,7 @@ def links_and_title_getter(gallery_code, filter_call=False):
     else:
         return gallery_code
 
-def get_links_and_title(gallery_code=None, artist_name=None, group_name=None):
+def get_links_and_title(gallery_code=None, artist_name=None, group_name=None) -> tuple:
     if gallery_code is not None:
         links_and_title_getter_res = links_and_title_getter(gallery_code)
         if type(links_and_title_getter_res) is str:
@@ -257,7 +256,7 @@ def get_links_and_title(gallery_code=None, artist_name=None, group_name=None):
     return image_links, gallery_folder
 
 # Function to validate title i.e: remove/replace special characters
-def validate_title(gallery_title):
+def validate_title(gallery_title) -> str:
     if any(chara in r'/\:*?"<>|' for chara in gallery_title):
         for chara in gallery_title:
             if chara in ['|', r'\\', r'/', ':']:

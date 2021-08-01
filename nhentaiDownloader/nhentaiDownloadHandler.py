@@ -3,11 +3,10 @@ import os
 import sys
 from pathlib import Path
 
-
 import nhentaiDownloader.nhentaiHelper as Helper
 
 # Function for downloading image
-def downloader(image_links, save_dest, folder, config):
+def downloader(image_links, save_dest, folder, config) -> bool:
     already_downloaded = 0
     done = False
     for index, image_link in enumerate(image_links, start=1):

@@ -1,5 +1,4 @@
 import os
-import sys
 
 import colorama
 
@@ -15,7 +14,7 @@ class DownloadByGalleries:
         self.invalid_codes = list()
         self.name_too_long = list()
 
-    def download_by_galleries(self, config, gallery_folder=None):
+    def download_by_galleries(self, config, gallery_folder=None) -> None:
         for gallery_code in self.gallery_codes:
             filter_ = GalleriesFilter(config=config, type_='gallery')
             response = filter_.check_database(get='ids', filter_option='ids', search_term=str(gallery_code), table='nhentaiLibrary', order_by='ids')

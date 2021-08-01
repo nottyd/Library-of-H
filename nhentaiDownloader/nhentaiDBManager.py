@@ -4,9 +4,27 @@ import csv
 import re
 import sys
 
+
 class nhentaiDBWriter:
     class nhentaiLibrary:
-        def set_database(self, database_location,  metadata_location, database_filename='nhentaiDatabase.db'):
+        def create_database(self) -> None:
+            self.c.execute(""" CREATE TABLE IF NOT EXISTS nhentaiLibrary (
+                        ids INTEGER UNIQUE,
+                        titles TEXT,
+                        artists TEXT,
+                        groups TEXT,
+                        parodies TEXT,
+                        characters TEXT,
+                        languages TEXT,
+                        categories TEXT,
+                        pages INTEGER,
+                        upload_date TEXT,
+                        tags TEXT,
+                        location TEXT
+                        )""")
+            self.conn.commit()
+
+        def set_database(self, database_location,  metadata_location, database_filename='nhentaiDatabase.db') -> None:
             self.database_location = database_location
             self.metadata_location = metadata_location
             self.database_filename = database_filename
@@ -28,24 +46,7 @@ class nhentaiDBWriter:
                 for item in self.data_dict:
                     self.update_database(item, root)
 
-        def create_database(self):
-            self.c.execute(""" CREATE TABLE IF NOT EXISTS nhentaiLibrary (
-                        ids INTEGER UNIQUE,
-                        titles TEXT,
-                        artists TEXT,
-                        groups TEXT,
-                        parodies TEXT,
-                        characters TEXT,
-                        languages TEXT,
-                        categories TEXT,
-                        pages INTEGER,
-                        upload_date TEXT,
-                        tags TEXT,
-                        location TEXT
-                        )""")
-            self.conn.commit()
-
-        def update_database(self, item, root):
+        def update_database(self, item, root) -> None:
             c = self.conn.cursor()
             with self.conn:
                 tags = re.sub("'", '', item['tags'])
@@ -94,7 +95,7 @@ class nhentaiDBWriter:
         The table is for storing codes that were deemed to have had duplicates.
         Contains two columns, one to store the actual downloaded codes and other to store the codes deemed as duplicates of downloaded code.
         """
-        def set_database(self, database_location, database_filename='nhentaiDatabase.db'):
+        def set_database(self, database_location, database_filename='nhentaiDatabase.db') -> None:
             self.database_location = database_location
             self.database_filename = database_filename
             if not self.database_location.endswith('.db'):
@@ -104,7 +105,7 @@ class nhentaiDBWriter:
                 self.conn = sqlite3.connect(self.database_location)
                 self.c = self.conn.cursor()
 
-        def update_database(self, downloaded_code, duplicate_codes):
+        def update_database(self, downloaded_code, duplicate_codes) -> None:
             self.c.execute(""" CREATE TABLE IF NOT EXISTS duplicates (
                         downloaded_id INTEGER,
                         duplicate_id INTEGER UNIQUE
@@ -128,7 +129,7 @@ class nhentaiDBWriter:
         The table is for storing Comics, anthologies, etc codes.
         Contains one column for storing the code.
         """
-        def set_database(self, database_location, database_filename='nhentaiDatabase.db'):
+        def set_database(self, database_location, database_filename='nhentaiDatabase.db') -> None:
             self.database_location = database_location
             self.database_filename = database_filename
             if not self.database_location.endswith('.db'):
@@ -138,7 +139,7 @@ class nhentaiDBWriter:
                 self.conn = sqlite3.connect(self.database_location)
                 self.c = self.conn.cursor()
 
-        def update_database(self, collection_codes):
+        def update_database(self, collection_codes) -> None:
             self.c.execute(""" CREATE TABLE IF NOT EXISTS collections (
                         collection_id INTEGER UNIQUE
                         )""")
@@ -158,13 +159,13 @@ class nhentaiDBWriter:
 
 
 class nhentaiDBBrowser:
-    def __init__(self):
+    def __init__(self) -> None:
         self.database_location = None
         self.database_filename = None
         filter_option = None
         search_terms = None
 
-    def set_database(self, database_location=os.path.abspath(__file__), database_filename='nhentaiDatabase.db'):
+    def set_database(self, database_location=os.path.abspath(__file__), database_filename='nhentaiDatabase.db') -> None:
         self.database_location = database_location
         self.database_filename = database_filename
 
@@ -175,11 +176,11 @@ class nhentaiDBBrowser:
             self.conn = sqlite3.connect(self.database_location)
             self.cur = self.conn.cursor()
 
-    def sqlite_select(self, get=None, order_by=None, order_in='ASC', table=None, limit=None, offset=None, filter_option=None, search_terms=None):
+    def sqlite_select(self, get=None, order_by=None, order_in='ASC', table=None, limit=None, offset=None, filter_option=None, search_terms=None) -> list:
         command = self.get_command(get=get, order_by=order_by, order_in=order_in, table=table, limit=limit, offset=offset, filter_option=filter_option, search_terms=search_terms)
         return self.execute(command=command, table=table)
 
-    def get_command(self, get, order_by, order_in, table, limit, offset, filter_option, search_terms):
+    def get_command(self, get, order_by, order_in, table, limit, offset, filter_option, search_terms) -> str:
         if filter_option == None and search_terms == None:
             if limit == None and offset == None:
                 command = f"""SELECT {get} FROM {table}"""
@@ -198,7 +199,7 @@ class nhentaiDBBrowser:
                 command +=  f' LIMIT {limit} OFFSET {offset}'
         return command
 
-    def execute(self, command, table):
+    def execute(self, command, table) -> list:
         try:
             self.cur.execute(command)
         except sqlite3.OperationalError as e:

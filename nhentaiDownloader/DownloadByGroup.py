@@ -1,4 +1,3 @@
-from enum import auto
 import os
 import re
 import sys
@@ -19,7 +18,7 @@ class DownloadByGroup:
         self.invalid_codes = []
         self.name_too_long = dict()
 
-    def group_galleries_downloader(self, gallery_codes, group_name, config, gallery_folder=None):
+    def group_galleries_downloader(self, gallery_codes, group_name, config, gallery_folder=None) -> None:
         for gallery_code in gallery_codes:
             get_links_and_title_res = Helper.get_links_and_title(gallery_code, group_name=group_name)
             if not isinstance(get_links_and_title_res[0], list):
@@ -49,13 +48,7 @@ class DownloadByGroup:
                 os.chdir(self.save_dest)
             print()
 
-            try:
-                gallery_folder = None
-                del(translated_title, original_title, gallery_title)
-            except UnboundLocalError as e:
-                continue
-
-    def download_by_group(self, config):
+    def download_by_group(self, config) -> None:
         for group in self.groups:
             filter_ = GalleriesFilter(config, type_='group')
             try:
