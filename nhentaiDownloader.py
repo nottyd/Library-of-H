@@ -10,6 +10,7 @@ from nhentaiDownloader.DownloadByArtist import DownloadByArtist
 from nhentaiDownloader.DownloadByGalleries import DownloadByGalleries
 from nhentaiDownloader.DownloadByGroup import DownloadByGroup
 from nhentaiDownloader.nhentaiConfig import nhentaiConfig
+import nhentaiDownloader.nhentaiHelper as Helper
 
 menu = """Choose a download method:
 1. Download by Galleries
@@ -20,6 +21,7 @@ Enter x to exit.
 config = nhentaiConfig()
 try:
     while True:
+        Helper.set_console_title(title_type="menu")
         choice = input(menu).lower()
         if choice == '1':
             gallery_codes = []
@@ -90,4 +92,5 @@ try:
 
         print()
 except KeyboardInterrupt as e:
+    Helper.set_console_title(title_type="exit")
     input('\nEnter to exit.')

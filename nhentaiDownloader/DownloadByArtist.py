@@ -19,7 +19,7 @@ class DownloadByArtist:
         self.name_too_long = dict()
 
     def artist_galleries_downloader(self, gallery_codes, artist_name, config, gallery_folder=None) -> None:
-        for gallery_code in gallery_codes:
+        for index, gallery_code in enumerate(gallery_codes, start=1):
             get_links_and_title_res = Helper.get_links_and_title(gallery_code, artist_name=artist_name)
             if not isinstance(get_links_and_title_res[0], list):
                 if gallery_folder is None:
@@ -38,6 +38,8 @@ class DownloadByArtist:
                 image_links = get_links_and_title_res[0]
                 gallery_folder = get_links_and_title_res[1]
             print(f'Downloading {gallery_folder}...')
+            gallery_progress = f'[{index} of {len(gallery_codes)}]'
+            Helper.set_console_title(gallery_progress=gallery_progress, gallery_id=gallery_code)
             Downloader.downloader(image_links=image_links, save_dest=self.save_dest , folder=gallery_folder, config=config)
 
             metadata = MetadataHandler(gallery_code, config=config)
@@ -49,7 +51,7 @@ class DownloadByArtist:
             print()
 
     def download_by_artist(self, config) -> None:
-        for artist in self.artists:
+        for index, artist in enumerate(self.artists, start=1):
             filter_ = GalleriesFilter(config, type_='artist')
             try:
                 os.chdir(self.save_dest)
@@ -59,6 +61,10 @@ class DownloadByArtist:
                 sys.exit(e)
             else:
                 artist_name = artist.capitalize()
+
+                input_list_progress = f'[{index} of {len(self.artists)}]'
+                Helper.set_console_title(input_list_progress=input_list_progress, artist_name=artist_name, reset=True)
+
                 self.url = 'https://www.nhentai.net/artist/' + re.sub(' ', '-', artist)
 
                 artist_soup = Helper.soup_maker(self.url)

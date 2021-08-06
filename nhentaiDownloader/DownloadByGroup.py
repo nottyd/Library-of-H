@@ -19,7 +19,7 @@ class DownloadByGroup:
         self.name_too_long = dict()
 
     def group_galleries_downloader(self, gallery_codes, group_name, config, gallery_folder=None) -> None:
-        for gallery_code in gallery_codes:
+        for index, gallery_code in enumerate(gallery_codes, start=1):
             get_links_and_title_res = Helper.get_links_and_title(gallery_code, group_name=group_name)
             if not isinstance(get_links_and_title_res[0], list):
                 if gallery_folder is None:
@@ -38,6 +38,8 @@ class DownloadByGroup:
                 image_links = get_links_and_title_res[0]
                 gallery_folder = get_links_and_title_res[1]
             print(f'Downloading {gallery_folder}...')
+            gallery_progress = f'[{index} of {len(gallery_codes)}]'
+            Helper.set_console_title(gallery_progress=gallery_progress, gallery_id=gallery_code)
             Downloader.downloader(image_links=image_links, save_dest=self.save_dest , folder=gallery_folder, config=config)
 
             metadata = MetadataHandler(gallery_code, config=config)
@@ -49,7 +51,7 @@ class DownloadByGroup:
             print()
 
     def download_by_group(self, config) -> None:
-        for group in self.groups:
+        for index, group in enumerate(self.groups, start=1):
             filter_ = GalleriesFilter(config, type_='group')
             try:
                 os.chdir(self.save_dest)
@@ -59,6 +61,10 @@ class DownloadByGroup:
                 sys.exit(e)
             else:
                 group_name = group.capitalize()
+
+                input_list_progress = f'[{index} of {len(self.groups)}]'
+                Helper.set_console_title(input_list_progress=input_list_progress, group_name=group_name, reset=True)
+
                 self.url = 'https://www.nhentai.net/group/' + re.sub(' ', '-', group)
 
                 group_soup = Helper.soup_maker(self.url)

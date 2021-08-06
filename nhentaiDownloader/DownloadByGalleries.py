@@ -15,7 +15,7 @@ class DownloadByGalleries:
         self.name_too_long = list()
 
     def download_by_galleries(self, config, gallery_folder=None) -> None:
-        for gallery_code in self.gallery_codes:
+        for index, gallery_code in enumerate(self.gallery_codes, start=1):
             filter_ = GalleriesFilter(config=config, type_='gallery')
             response = filter_.check_database(get='ids', filter_option='ids', search_term=str(gallery_code), table='nhentaiLibrary', order_by='ids')
             if not response:
@@ -36,6 +36,8 @@ class DownloadByGalleries:
                     if gallery_folder is None:
                         gallery_folder = get_links_and_title_res[1]
                 print(f'Downloading {gallery_folder}...')
+                gallery_progress = f'[{index} of {len(self.gallery_codes)}]'
+                Helper.set_console_title(gallery_progress=gallery_progress, gallery_id=gallery_code)
                 Downloader.downloader(image_links, os.path.abspath('.'), gallery_folder, config=config)
                 
                 metadata = MetadataHandler(gallery_code, config=config)

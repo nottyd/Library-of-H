@@ -1,4 +1,6 @@
 import sys
+import platform
+import subprocess
 import re
 import time
 import itertools
@@ -11,6 +13,9 @@ import colorama
 colorama.init(autoreset=True)
 
 from nhentaiDownloader.nhentaiConfig import nhentaiConfig
+
+program_title = "nhentaiDownloader"
+title = {'program_title': program_title, 'title_type':  None, 'input_list_progress': None, 'artist_name': None, 'group_name': None, 'gallery_progress': None, 'gallery_id': None, 'download_progress': None}
 
 config = nhentaiConfig()
 
@@ -270,3 +275,59 @@ def validate_title(gallery_title) -> str:
             elif chara == '>':
                 gallery_title = re.sub(chara, ')', gallery_title)
     return gallery_title
+
+def set_console_title(title_type=None, input_list_progress=None,artist_name=None, group_name=None, gallery_progress=None, gallery_id=None, download_progress=None, reset=False) -> None:
+    global title
+    final_title = ''
+    if reset:
+        title = {'program_title': program_title, 'title_type':  None, 'input_list_progress': None, 'artist_name': None, 'group_name': None, 'gallery_progress': None, 'gallery_id': None, 'download_progress': None}
+
+    if title_type:
+        title['title_type'] = title_type
+        final_title = title['program_title'] + ' -   ' + title['title_type']
+
+    else:
+        final_title = title['program_title']
+        if input_list_progress:
+            title['input_list_progress'] = input_list_progress
+            final_title += ' -   ' + title['input_list_progress']
+        elif title['input_list_progress']:
+            final_title += ' -   ' + title['input_list_progress']
+
+        if artist_name:
+            title['artist_name'] = artist_name
+            final_title += '   Artist:' + title['artist_name']
+        elif title['artist_name']:
+            final_title += '   Artist:' + title['artist_name']
+
+        if group_name:
+            title['group_name'] = group_name
+            final_title += '   Group:' + title['group_name']
+        elif title['group_name']:
+            final_title += '   Group:' + title['group_name']
+
+        if gallery_progress:
+            title['gallery_progress'] = gallery_progress
+            final_title += '   ' + title['gallery_progress']
+        elif title['gallery_progress']:
+            final_title += '   ' + title['gallery_progress']
+
+        if gallery_id:
+            title['gallery_id'] = gallery_id
+            final_title += '   Id:' + title['gallery_id']
+        elif title['gallery_id']:
+            final_title += '   Id:' + title['gallery_id']
+
+        if download_progress:
+            title['download_progress'] = download_progress
+            final_title += '   ' + title['download_progress']
+        elif title['download_progress']:
+            final_title += '   ' + title['download_progress']
+
+    if platform.system() == "Windows":
+        try:
+            subprocess.call('title ' + final_title, shell=True)
+        except FileNotFoundError:
+            print("error", f"Cannot set console title to {final_title}")
+    else:
+        sys.stdout.write(f"\x1b]2;{final_title}\x07")
