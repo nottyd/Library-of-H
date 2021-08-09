@@ -13,7 +13,7 @@ class ConfigItems:
         self.default = default
 
 
-class nhentaiConfig:
+class Config:
     config_default = [
         ConfigItems('Network', 'useragent',
         'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36'),
@@ -38,7 +38,7 @@ class nhentaiConfig:
     def __init__(self) -> None:
         for item in self.config_default:
             setattr(self, f'default_{item.option}', item.default)
-        if not os.path.isfile(os.path.join(_config_file_location, 'nhentaiConfig.ini')):
+        if not os.path.isfile(os.path.join(_config_file_location, 'Config.ini')):
             self.write_config()
         self.load_config()
 
@@ -49,12 +49,12 @@ class nhentaiConfig:
             config.add_section(k)
             for item in g:
                 config.set(k, item.option, self.__getattribute__(f'default_{item.option}'))
-        with open(os.path.join(_config_file_location, 'nhentaiConfig.ini'), 'w') as f:
+        with open(os.path.join(_config_file_location, 'Config.ini'), 'w') as f:
             config.write(f)
     
     def load_config(self) -> None:
         config = configparser.RawConfigParser()
-        config.read(os.path.join(_config_file_location, 'nhentaiConfig.ini'))
+        config.read(os.path.join(_config_file_location, 'Config.ini'))
         for item, value in config.items():
             for i, v in value.items():
                 try:
@@ -71,18 +71,18 @@ class nhentaiConfig:
 
     def config_checker(self) -> None:
         if not isinstance(self.collection, bool):
-            sys.exit('Error loading collection preferences from nhentaiConfig.ini, only accepted values are True or False.')
+            sys.exit('Error loading collection preferences from Config.ini, only accepted values are True or False.')
         if not isinstance(self.duplicate, bool):
-            sys.exit('Error loading duplicate preferences from nhentaiConfig.ini, only accepted values are True or False.')
+            sys.exit('Error loading duplicate preferences from Config.ini, only accepted values are True or False.')
         if not isinstance(self.overwrite, bool):
-            sys.exit('Error loading overwrite preferences from nhentaiConfig.ini, only accepted values are True or False.')
+            sys.exit('Error loading overwrite preferences from Config.ini, only accepted values are True or False.')
 
         if isinstance(self.retry, float):
             self.retry = int(self.retry)
         elif not isinstance(self.retry, int):
-            sys.exit('Error loading retry preferences from nhentaiConfig.ini, only accepted values are int.')
+            sys.exit('Error loading retry preferences from Config.ini, only accepted values are int.')
         if not isinstance(self.retrywait, (float, int)):
-            sys.exit('Error loading retrywait preferences from nhentaiConfig.ini, only accepted values are int or float.')
+            sys.exit('Error loading retrywait preferences from Config.ini, only accepted values are int or float.')
 
         self.gallerydownloadlocation = re.sub('\\\\', re.escape(os.sep), self.gallerydownloadlocation)
         self.gallerydownloadlocation = re.sub('/', re.escape(os.sep), self.gallerydownloadlocation)
@@ -128,4 +128,4 @@ class nhentaiConfig:
         if self.default_databaselocation.startswith(f'.{os.sep}'):
             self.default_databaselocation = os.path.join(os.path.abspath('.'), self.default_databaselocation[2:])
 
-# config = nhentaiConfig()
+# config = Config()

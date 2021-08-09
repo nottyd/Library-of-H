@@ -3,7 +3,7 @@ import os
 import sys
 from pathlib import Path
 
-import nhentaiDownloader.nhentaiHelper as Helper
+import nhentaiDownloader.Helper as Helper
 
 # Function for downloading image
 def downloader(image_links, save_dest, folder, config) -> bool:

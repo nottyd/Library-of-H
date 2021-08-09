@@ -1,10 +1,10 @@
 import os
 from typing import Union
 
-import nhentaiDownloader.nhentaiHelper as Helper
-from nhentaiDownloader.nhentaiMetadataHandler import MetadataHandler
-from nhentaiDownloader.nhentaiDBManager import nhentaiDBBrowser, nhentaiDBWriter
-
+import nhentaiDownloader.Helper as Helper
+from nhentaiDownloader.MetadataHandler import MetadataHandler
+import nhentaiDBManager.DBWriter as DBWriter
+from nhentaiDBManager.DBReader import DBReader
 class GalleriesFilter:
 
     def __init__(self, config=None, type_=None):
@@ -101,7 +101,7 @@ class GalleriesFilter:
             database_location = self.config.default_databaselocation
 
         if os.path.isfile(os.path.join(database_location, 'nhentaiDatabase.db')):
-            nhen_DBB = nhentaiDBBrowser()
+            nhen_DBB = DBReader()
             nhen_DBB.set_database(database_location=database_location)
             try:
                 response = nhen_DBB.sqlite_select(get=get, order_by=order_by, order_in=order_in, table=table, filter_option=filter_option, search_terms=search_term)[0]
@@ -119,7 +119,7 @@ class GalleriesFilter:
             self.config = config
             self.codes_and_metadata = codes_and_metadata
             self.collections_count = 0
-            self.nhen_DBW_f =  nhentaiDBWriter.FilteredCollections()
+            self.nhen_DBW_f =  DBWriter.FilteredCollections()
             if os.path.isdir(self.config.databaselocation):
                 database_location = self.config.databaselocation
             else:
@@ -180,7 +180,7 @@ class GalleriesFilter:
             self.config = config
             self.codes_and_metadata = codes_and_metadata
             self.filtered_gallery_codes = filtered_gallery_codes
-            self.nhen_DBW_f =  nhentaiDBWriter.DownloadedAndDuplicates()
+            self.nhen_DBW_f =  DBWriter.DownloadedAndDuplicates()
             if os.path.isdir(self.config.databaselocation):
                 database_location = self.config.databaselocation
             else:

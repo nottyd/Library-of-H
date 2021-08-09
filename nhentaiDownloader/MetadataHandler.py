@@ -4,8 +4,8 @@ import sys
 import re
 from typing import Union
 
-import nhentaiDownloader.nhentaiHelper as Helper
-from nhentaiDownloader.nhentaiDBManager import nhentaiDBWriter
+import nhentaiDownloader.Helper as Helper
+import nhentaiDBManager.DBWriter as DBWriter
 
 class MetadataHandler:
     def __init__(self, gallery_code, gallery_folder=None, config=None) -> None:
@@ -26,7 +26,7 @@ class MetadataHandler:
                 print(e)
 
     def database_writer(self, all_=False) -> None:
-        nhen_DBW_l = nhentaiDBWriter.nhentaiLibrary()
+        nhen_DBW_l = DBWriter.nhentaiLibrary()
         if os.path.isdir(f'{self.config.databaselocation}'):
             nhen_DBW_l.set_database(self.config.databaselocation, metadata_location=os.path.abspath('.'))
         else:

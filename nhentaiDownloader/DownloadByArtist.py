@@ -6,9 +6,9 @@ import colorama
 colorama.init(autoreset=True)
 
 from nhentaiDownloader.GalleriesFilter import GalleriesFilter
-from nhentaiDownloader.nhentaiMetadataHandler import MetadataHandler
-import nhentaiDownloader.nhentaiHelper as Helper
-import nhentaiDownloader.nhentaiDownloadHandler as Downloader
+from nhentaiDownloader.MetadataHandler import MetadataHandler
+import nhentaiDownloader.Helper as Helper
+import nhentaiDownloader.DownloadHandler as Downloader
 
 class DownloadByArtist:
     def __init__(self, artists, save_dest):

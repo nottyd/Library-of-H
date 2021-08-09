@@ -9,7 +9,7 @@ from PIL import ImageQt, Image
 from nhentaiExplorer.CustomWidgets import BrowserItemWidget
 from nhentaiExplorer.CustomWidgets import QPushButton
 from nhentaiExplorer.CustomWidgets import WorkerThread
-from nhentaiDownloader.nhentaiDBManager import nhentaiDBBrowser
+from nhentaiDBManager.DBReader import DBReader
 
 
 class Browser(qtw.QGroupBox):
@@ -99,7 +99,7 @@ class Browser(qtw.QGroupBox):
     def set_database(self, location):
         self.offset = 0
         self.database_location = location
-        self.nhen_DBB = nhentaiDBBrowser()
+        self.nhen_DBB = DBReader()
         self.nhen_DBB.set_database(database_location=self.database_location)
 
     def get_items(self, mode=None):

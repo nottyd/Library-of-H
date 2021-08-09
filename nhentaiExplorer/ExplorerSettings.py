@@ -1,6 +1,6 @@
 import os
 import itertools
-from PyQt5.QtCore import QSettings, qSetFieldWidth
+from PyQt5.QtCore import QSettings
 
 _config_file_location = os.path.dirname(__file__)
 

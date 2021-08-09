@@ -2,10 +2,10 @@ import os
 
 import colorama
 
-import nhentaiDownloader.nhentaiDownloadHandler as Downloader
-from nhentaiDownloader.nhentaiMetadataHandler import MetadataHandler
-import nhentaiDownloader.nhentaiHelper as Helper
 from nhentaiDownloader.GalleriesFilter import GalleriesFilter
+from nhentaiDownloader.MetadataHandler import MetadataHandler
+import nhentaiDownloader.Helper as Helper
+import nhentaiDownloader.DownloadHandler as Downloader
 
 class DownloadByGalleries:
     def __init__(self, gallery_codes, save_dest):

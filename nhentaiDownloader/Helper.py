@@ -12,12 +12,12 @@ from bs4 import BeautifulSoup
 import colorama
 colorama.init(autoreset=True)
 
-from nhentaiDownloader.nhentaiConfig import nhentaiConfig
+from nhentaiDownloader.Config import Config
 
 program_title = "nhentaiDownloader"
 title = {'program_title': program_title, 'title_type':  None, 'input_list_progress': None, 'artist_name': None, 'group_name': None, 'gallery_progress': None, 'gallery_id': None, 'download_progress': None}
 
-config = nhentaiConfig()
+config = Config()
 
 def log_and_print(error_family=None, error_type=None, error=None, error_msg='', gallery_title=None, original_title=None, download_type=None, cont_default=None, retry=None) -> None:
     if error_msg != '':
@@ -42,7 +42,7 @@ def log_and_print(error_family=None, error_type=None, error=None, error_msg='', 
         if error_type == 'unavailable_languages':
             error_msg = f'{colorama.Fore.RED}Error formatting title with %(translated_title)s and/or %(original_title)s: Title not available in those languages.'
         elif error_type == 'downloadname_load_error':
-            error_msg = f'{colorama.Fore.RED}Error loading {download_type}downloadnameformat from nhentaiConfig.ini: {error}'
+            error_msg = f'{colorama.Fore.RED}Error loading {download_type}downloadnameformat from Config.ini: {error}'
             if cont_default:
                 if download_type == 'artist':
                     defaults = config.default_artistdownloadnameformat
@@ -51,7 +51,7 @@ def log_and_print(error_family=None, error_type=None, error=None, error_msg='', 
                 elif download_type == 'gallery':
                     defaults = config.default_gallerydownloadnameformat
         elif error_type == 'databaselocation_load_error':
-            error_msg = f'{colorama.Fore.RED}Error loading databaselocation from nhentaiConfig.ini: {error}'
+            error_msg = f'{colorama.Fore.RED}Error loading databaselocation from Config.ini: {error}'
             if cont_default:
                 defaults = config.default_databaselocation
         if cont_default:
