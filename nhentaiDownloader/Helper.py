@@ -1,4 +1,5 @@
 import sys
+import os
 import platform
 import subprocess
 import re
@@ -170,7 +171,7 @@ def links_and_title_getter(gallery_code, filter_call=False) -> Union[tuple, str]
         gallery_before = ''
     try:
         gallery_pretty = soup.find('span', class_='pretty').text
-        temp = gallery_pretty.split('|') # translated and original titles are usually seperated my a '|'
+        temp = gallery_pretty.split('|') # translated and original titles are usually seperated by a '|'
         if len(temp) == 2 and not filter_call:
             translated_title = temp[1]
             original_title = temp[0]
@@ -253,7 +254,7 @@ def get_links_and_title(gallery_code=None, artist_name=None, group_name=None) ->
             log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='gallery', cont_default=True)
             gallery_folder = config.default_gallerydownloadnameformat % locals()
 
-    if len(gallery_folder.split('\\')[-1]) > 250:
+    if len(gallery_folder.split(os.sep)[-1]) > 250:
         log_and_print()
         log_and_print(error_family='OSError', error_type='name_too_long', gallery_title=gallery_title, retry=False)
         return gallery_code, 'name too long', image_links, gallery_folder

@@ -161,7 +161,7 @@ class Browser(qtw.QGroupBox):
             description.setWidget(self.metadata_widget)
 
             thumbnail = qtw.QLabel()
-            loading_gif = qtg.QMovie(r'B:\My Scripts\Library-of-H\assets\Loading.gif')
+            loading_gif = qtg.QMovie(os.sep.join(['.', "assets", "Loading.gif"]))
             thumbnail.setMovie(loading_gif)
             loading_gif.start()
 

@@ -2,8 +2,6 @@ import os
 import itertools
 from PyQt5.QtCore import QSettings
 
-_config_file_location = os.path.dirname(__file__)
-
 class SettingItems:
     def __init__(self, section, option, default):
         self.section = section
@@ -31,7 +29,7 @@ class SettingDescriptor:
 
 class ExplorerSettings:
 
-    settings_file = './nhentaiExplorer/.ExplorerSettings.conf'
+    settings_file = os.sep.join('.', "nhentaiExplorer", "ExplorerSettings.conf")
 
     setting_defaults = [
         SettingItems('Window', 'last_session_isMaximized', 'False'),
