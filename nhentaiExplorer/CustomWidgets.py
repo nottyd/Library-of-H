@@ -26,12 +26,12 @@ class ImageScrollArea(qtw.QScrollArea):
                 self.resized += ImageScrollArea.resized_constant
                 if self.resized >= 90: self.resized = 90
                 self.resize_image()
-                self.image_label.setPixmap(self.curr_img_pixmap)
+                self.image_label.setPixmap(self.current_image_pixmap)
             elif event.angleDelta().y() == -120:
                 self.resized -= ImageScrollArea.resized_constant
                 if self.resized <= -90: self.resized = -90
                 self.resize_image()
-                self.image_label.setPixmap(self.curr_img_pixmap)
+                self.image_label.setPixmap(self.current_image_pixmap)
         else:
             self.scroll_(event.angleDelta().y())
 
