@@ -3,7 +3,6 @@ import sqlite3
 import csv
 import re
 import sys
-
 class nhentaiLibrary:
     def create_database(self) -> None:
         self.c.execute(""" CREATE TABLE IF NOT EXISTS nhentaiLibrary (
