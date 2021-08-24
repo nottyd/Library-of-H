@@ -2,8 +2,6 @@ from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtCore as qtc
 
 from nhentaiExplorer.CustomWidgets import SearchBoxWidget
-from nhentaiExplorer.CustomWidgets import QPushButton
-
 
 class Search(SearchBoxWidget):
 

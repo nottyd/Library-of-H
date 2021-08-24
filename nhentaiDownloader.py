@@ -9,8 +9,8 @@ colorama.init(autoreset=True)
 from nhentaiDownloader.DownloadByArtist import DownloadByArtist
 from nhentaiDownloader.DownloadByGalleries import DownloadByGalleries
 from nhentaiDownloader.DownloadByGroup import DownloadByGroup
-from nhentaiDownloader.nhentaiConfig import nhentaiConfig
-import nhentaiDownloader.nhentaiHelper as Helper
+from nhentaiDownloader.Config import Config
+import nhentaiDownloader.Helper as Helper
 
 menu = """Choose a download method:
 1. Download by Galleries
@@ -18,7 +18,7 @@ menu = """Choose a download method:
 3. Download by Groups
 Enter x to exit.
 >> """
-config = nhentaiConfig()
+config = Config()
 try:
     while True:
         Helper.set_console_title(title_type="menu")

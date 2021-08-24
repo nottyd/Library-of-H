@@ -1,8 +1,6 @@
 import os
 import itertools
-from PyQt5.QtCore import QSettings, qSetFieldWidth
-
-_config_file_location = os.path.dirname(__file__)
+from PyQt5.QtCore import QSettings
 
 class SettingItems:
     def __init__(self, section, option, default):
@@ -31,7 +29,7 @@ class SettingDescriptor:
 
 class ExplorerSettings:
 
-    settings_file = './nhentaiExplorer/.ExplorerSettings.conf'
+    settings_file = os.sep.join(['.', "nhentaiExplorer", "ExplorerSettings.conf"])
 
     setting_defaults = [
         SettingItems('Window', 'last_session_isMaximized', 'False'),
