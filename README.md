@@ -121,7 +121,7 @@ Run the python file.
 A script to create a database file with already existing nhentai library.  
 _Library must contain metadata.csv files for this to work._
 
-## usage:
+## usage
 ```python
 python3 nhentaiLibraryToDatabase.py "location/to/library"
 ```
