@@ -117,3 +117,11 @@ Import the `nhentaiDatabase.db` file created by the nhentaiDownloader script.
 
 ## usage
 Run the python file.
+# nhentaiLibraryToDatabase
+A script to create a database file with already existing nhentai library.  
+_Library must contain metadata.csv files for this to work._
+
+## Usage:
+```python
+python3 nhentaiLibraryToDatabase.py "location/to/library"
+```
