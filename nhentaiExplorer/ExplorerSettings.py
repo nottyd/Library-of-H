@@ -29,7 +29,7 @@ class SettingDescriptor:
 
 class ExplorerSettings:
 
-    settings_file = os.sep.join('.', "nhentaiExplorer", "ExplorerSettings.conf")
+    settings_file = os.sep.join(['.', "nhentaiExplorer", "ExplorerSettings.conf"])
 
     setting_defaults = [
         SettingItems('Window', 'last_session_isMaximized', 'False'),
