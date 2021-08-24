@@ -9,13 +9,11 @@ import nhentaiDownloader.Helper as Helper
 def downloader(image_links, save_dest, folder, config) -> bool:
     already_downloaded = 0
     done = False
-    Helper.set_console_title(download_progress=f'[{0} / {len(image_links)}]')
-    Helper.print_bar_progress(total=len(image_links), progress=0, msg='Downloaded pages')
     for index, image_link in enumerate(image_links, start=1):
         while not done:
             if image_links[0] == image_link:
-                Helper.print_bar_progress(total=len(image_links), progress=index, msg='Downloaded pages')
-                Helper.set_console_title(download_progress=f'[{index} / {len(image_links)}]')
+                Helper.print_bar_progress(total=len(image_links), progress=0, msg='Downloaded pages')
+                Helper.set_console_title(download_progress=f'[{0} / {len(image_links)}]')
             if already_downloaded != 0:
                 Helper.print_bar_progress(total=len(image_links), progress=already_downloaded+(index-already_downloaded), msg='Downloaded pages')
                 Helper.set_console_title(download_progress=f'[{already_downloaded+(index-already_downloaded)} / {len(image_links)}]')
