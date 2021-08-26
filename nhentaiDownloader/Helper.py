@@ -4,7 +4,6 @@ import platform
 import subprocess
 import re
 import time
-import itertools
 import logging
 from typing import Union
 
@@ -14,52 +13,12 @@ import colorama
 colorama.init(autoreset=True)
 
 from nhentaiDownloader.Config import Config
+from nhentaiErrorHandling import Logging, nhentaiExceptions
 
 program_title = "nhentaiDownloader"
 title = {'program_title': program_title, 'title_type':  None, 'input_list_progress': None, 'artist_name': None, 'group_name': None, 'gallery_progress': None, 'gallery_id': None, 'download_progress': None}
 
 config = Config()
-
-def log_and_print(error_family=None, error_type=None, error=None, error_msg='', gallery_title=None, original_title=None, download_type=None, cont_default=None, retry=None) -> None:
-    if error_msg != '':
-        print(error_msg)
-        return
-
-    if error_family == 'URLError':
-        error_msg = f'{colorama.Fore.RED}<{str(error)}>'
-        if error_type == 'temporary':
-            error_msg += ' Temporary Error.'
-        error_msg += f'\n{colorama.Fore.RED}URL => {colorama.Fore.BLUE}{error.url}'
-
-    elif error_family == 'OSError':
-        if error_type == 'network':
-            error_msg = f'{colorama.Fore.RED}{str(error)}'
-        elif error_type == 'name_too_long':
-            error_msg = f'{colorama.Fore.RED}[file name too long]: {colorama.Fore.BLUE}{gallery_title}'
-            if retry:
-                error_msg += f'\n{colorama.Fore.RED}Retrying with: {colorama.Fore.BLUE}{original_title}'
-
-    elif error_family == 'CONFError':
-        if error_type == 'unavailable_languages':
-            error_msg = f'{colorama.Fore.RED}Error formatting title with %(translated_title)s and/or %(original_title)s: Title not available in those languages.'
-        elif error_type == 'downloadname_load_error':
-            error_msg = f'{colorama.Fore.RED}Error loading {download_type}downloadnameformat from Config.ini: {error}'
-            if cont_default:
-                if download_type == 'artist':
-                    defaults = config.default_artistdownloadnameformat
-                elif download_type == 'group':
-                    defaults = config.default_groupdownloadnameformat
-                elif download_type == 'gallery':
-                    defaults = config.default_gallerydownloadnameformat
-        elif error_type == 'databaselocation_load_error':
-            error_msg = f'{colorama.Fore.RED}Error loading databaselocation from Config.ini: {error}'
-            if cont_default:
-                defaults = config.default_databaselocation
-        if cont_default:
-            error_msg += f'\n{colorama.Fore.RED}Continuing with defaults: {colorama.Fore.BLUE}{defaults}'
-
-    error_msg += '\n'
-    print(error_msg)
 
 # Funcction to create Browser object
 def browser_factory() -> mechanize.Browser:
@@ -72,45 +31,34 @@ def browser_factory() -> mechanize.Browser:
 def soup_maker(url) -> Union[BeautifulSoup, str]:
     request = get_request(url)
     response = get_response_with_retry(request)
-    if str(type(response)) == "<class 'mechanize._response.response_seek_wrapper'>":
-        response = response.read()
-        soup = BeautifulSoup(response, 'lxml')
-    else:
-        soup = response
-
+    response = response.read()
+    soup = BeautifulSoup(response, 'lxml')
     return soup
 
-# Function to get response with mechanize and retry 3 times
-def get_response_with_retry(request) -> Union[int, None, mechanize._response.response_seek_wrapper]:
+# Function to get response with mechanize and retry config.retry times
+def get_response_with_retry(request) -> mechanize._response.response_seek_wrapper:
     errno = 0
     br = browser_factory()
     for i in range(config.retry+1):
         try:
            response = br.open(request)
         except mechanize.HTTPError as e:
-            if e.getcode() >= 400 and e.getcode() <= 511:
-                if e.getcode() == 403: # Forbidden
-                    log_and_print(error_family='URLError', error_type='forbidden', error=e)
-                    return e.getcode()
-                elif e.getcode() == 404 or e.getcode() == 410: # Page Not Found and Page Gone
-                    log_and_print(error_family='URLError', error_type='page_not_found', error=e)
-                    return e.getcode()
-                elif e.getcode() in [408, 429, 500, 502, 503, 504]:
-                    # 408: Request Timeout;
-                    # 429: Too Many Requests;
-                    # 500: Internal Server Error;
-                    # 502: Bad Gateway;
-                    # 504: Gateway Timeout
-                    print()
-                    log_and_print(error_family='URLError', error_type='temporary', error=e)
-                    print(f'{colorama.Fore.WHITE}{i+1} try out of {config.retry}.')
-                    time.sleep(config.retrywait)
+            if e.getcode() in [408, 429, 500, 502, 503, 504]:
+                # 408: Request Timeout; 429: Too Many Requests; 500: Internal Server Error; 502: Bad Gateway; 504: Gateway Timeout;
+                print_msg = f'\n{colorama.Fore.RED}<{str(e)}> Temporary Error\
+                    \n{colorama.Fore.RED}URL => {colorama.Fore.BLUE}{e.url}'
+                Logging.print_(print_msg=print_msg)
+                print(f'{colorama.Fore.WHITE}{i+1} try out of {config.retry}.')
+                if i+1 == config.retry+1:
+                    print(f'{colorama.Fore.RED}Out of retries.')
+                    raise nhentaiExceptions.TimeoutError(e.url)
+                time.sleep(config.retrywait)
+            else:
+                raise
+
         except OSError as e:
-            if i+1 == config.retry+1:
-                print(f'{colorama.Fore.RED}Out of retries.')
-                return None
             if e.args[0].errno == 10053 or errno == 10053:
-                log_and_print(error_family='OSError', error_type='network', error=e)
+                print(f'{colorama.Fore.RED}{str(e)}')
                 while True:
                     print(f'{colorama.Fore.WHITE}Would you like to retry?(y/n) ', end='')
                     retry = input()
@@ -118,11 +66,13 @@ def get_response_with_retry(request) -> Union[int, None, mechanize._response.res
                         print(f'{i+1} try out of {config.retry}.')
                         break
                     if retry.lower() == 'n':
-                        return None
+                        Logging.log_and_print(level='critical', log_msg=e, print_msg=f'{colorama.Fore.RED}{str(e)}', log_type='downloader')
+                        raise
                     print()
                 errno = 10053
+
             elif e.args[0].errno == 2:
-                log_and_print(error_family='OSError', error_type='network', error=e)
+                print(f'{colorama.Fore.RED}{str(e)}')
                 while True:
                     print(f'{colorama.Fore.WHITE}Would you like to retry?(y/n) ', end='')
                     retry = input()
@@ -130,13 +80,14 @@ def get_response_with_retry(request) -> Union[int, None, mechanize._response.res
                         print(f'{i+1} try out of {config.retry}.')
                         break
                     if retry.lower() == 'n':
-                        return None
+                        Logging.log_and_print(level='critical', log_msg=e, print_msg=f'{colorama.Fore.RED}{str(e)}', log_type='downloader')
+                        raise
                     print()
-            print()
+
+            if i+1 == config.retry+1:
+                raise
         else:
             return response
-    print()
-    return None
 
 # Function to get request
 def get_request(url) -> mechanize._request.Request:
@@ -165,36 +116,49 @@ def link_converter(image_links) -> list:
 def links_and_title_getter(gallery_code, filter_call=False) -> Union[tuple, str]:
     gallery_url = 'https://www.nhentai.net/g/{}'.format(gallery_code)
     soup = soup_maker(gallery_url)
+
     try:
         gallery_before = soup.find('span', class_='before').text
-    except Exception:
+    except AttributeError:
         gallery_before = ''
+        log_msg = "Gallery name does not contain class: 'before'"
+        print_msg = log_msg
+        Logging.log_and_print(level="warning", log_msg=log_msg, print_msg=print_msg, log_type="downloader")
+
     try:
         gallery_pretty = soup.find('span', class_='pretty').text
+    except AttributeError:
+        gallery_pretty = ''
+        log_msg = "Gallery name does not contain class: 'pretty'"
+        print_msg = log_msg
+        Logging.log_and_print(level="warning", log_msg=log_msg, print_msg=print_msg, log_type="downloader")
+    else:
         temp = gallery_pretty.split('|') # translated and original titles are usually seperated by a '|'
         if len(temp) == 2 and not filter_call:
             translated_title = temp[1]
             original_title = temp[0]
             gallery_pretty = (original_title, translated_title)
-    except Exception:
-        gallery_pretty = ''
+
     try:
         gallery_after = soup.find('span', class_='after').text
-    except Exception:
+    except AttributeError:
         gallery_after = ''
+        log_msg = "Gallery name does not contain class: 'after'"
+        print_msg = log_msg
+        Logging.log_and_print(level="warning", log_msg=log_msg, print_msg=print_msg, log_type="downloader")
+
     gallery_title = (gallery_before, gallery_pretty, gallery_after)
     if soup is not None:
         page_links = [str(link.get('src')) for link in soup.find_all('img')]
         image_links = [t_image_link for page_link in page_links for t_image_link in re.findall('https://t.nhentai.net/galleries/.+/.+t\..+', page_link)]
         return (link_converter(image_links), gallery_title)
     else:
-        return gallery_code
+        raise nhentaiExceptions.InvalidCode(gallery_code)
+
 
 def get_links_and_title(gallery_code=None, artist_name=None, group_name=None) -> tuple:
     if gallery_code is not None:
         links_and_title_getter_res = links_and_title_getter(gallery_code)
-        if type(links_and_title_getter_res) is str:
-            return gallery_code, 'invalid code'
         image_links = links_and_title_getter_res[0]
         gallery_before = validate_title(links_and_title_getter_res[1][0])
         translated_title = None
@@ -206,60 +170,68 @@ def get_links_and_title(gallery_code=None, artist_name=None, group_name=None) ->
         else:
             gallery_title = validate_title(links_and_title_getter_res[1][1])
         if len(gallery_title) > 250:
-            try:
-                temp = original_title
-                log_and_print(error_family='OSError', error_type='name_too_long', gallery_title=gallery_title, original_title=original_title, retry=True)
-                gallery_title = original_title
-            except Exception:
-                pass
+            raise nhentaiExceptions.InvalidTitleError(gallery_title=gallery_title, gallery_code=gallery_code)
         gallery_after = validate_title(links_and_title_getter_res[1][2])
-    if artist_name is not None:
-        try:
-            gallery_folder = config.artistdownloadnameformat % locals()
-        except KeyError as e:
-            if not translated_title or not original_title:
-                log_and_print(error_family='CONFError', error_type='unavailable_languages', download_type='artist', cont_default=True)
-                gallery_folder = config.default_artistdownloadnameformat % locals()
-            else:
-                log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='artist', cont_default=True)
-                gallery_folder = config.default_artistdownloadnameformat % locals()
-        except Exception as e:
-            log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='artist', cont_default=True)
-            gallery_folder = config.default_artistdownloadnameformat % locals()
-    elif group_name is not None:
-        try:
-            gallery_folder = config.groupdownloadnameformat % locals()
-        except KeyError as e:
-            if not translated_title or not original_title:
-                log_and_print(error_family='CONFError', error_type='unavailable_languages', download_type='group', cont_default=True)
-                gallery_folder = config.default_groupdownloadnameformat % locals()
-            else:
-                log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='group', cont_default=True)
-                gallery_folder = config.default_groupdownloadnameformat % locals()
-        except Exception as e:
-            log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='group', cont_default=True)
-            gallery_folder = config.default_groupdownloadnameformat % locals()
-    else:
-        try:
-            gallery_folder = config.gallerydownloadnameformat % locals()
-        except KeyError as e:
-            if not translated_title or not original_title:
-                log_and_print(error_family='CONFError', error_type='unavailable_languages', download_type='gallery', cont_default=True)
-                gallery_folder = config.default_gallerydownloadnameformat % locals()
-            else:
-                log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='gallery', cont_default=True)
-                gallery_folder = config.default_gallerydownloadnameformat % locals()
 
-        except Exception as e:
-            log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='gallery', cont_default=True)
-            gallery_folder = config.default_gallerydownloadnameformat % locals()
+        if artist_name:
+            gallery_folder = artist_gallery_title(gallery_title, gallery_code, translated_title, original_title)
+        elif group_name:
+            gallery_folder = artist_gallery_title(gallery_title, gallery_code, translated_title, original_title)
+        else:
+            gallery_folder = artist_gallery_title(gallery_title, gallery_code, translated_title, original_title)
 
-    if len(gallery_folder.split(os.sep)[-1]) > 250:
-        log_and_print()
-        log_and_print(error_family='OSError', error_type='name_too_long', gallery_title=gallery_title, retry=False)
-        return gallery_code, 'name too long', image_links, gallery_folder
+        if len(gallery_folder.split(os.sep)[-1]) > 250:
+            Logging.log_and_print()
+            Logging.log_and_print(error_family='OSError', error_type='name_too_long', gallery_title=gallery_title, retry=False)
+            return gallery_code, 'name too long', image_links, gallery_folder
 
-    return image_links, gallery_folder
+        return image_links, gallery_folder
+
+def artist_gallery_title(gallery_title, gallery_code, translated_title, original_title) -> str:
+    try:
+        gallery_folder = config.artistdownloadnameformat % locals()
+    except KeyError as e:
+        if (not translated_title and '%(translated_title)s' in config.artistdownloadnameformat) or (not original_title and '%(original_title)s' in config.artistdownloadnameformat):
+            Logging.print_(print_msg=f'{colorama.Fore.RED}Error formatting title with %(translated_title)s and/or %(original_title)s: Title not available in those languages.')
+            raise nhentaiExceptions.InvalidTitleError(gallery_title=gallery_title, gallery_code=gallery_code)
+        else:
+            Logging.print_(print_msg=f'{colorama.Fore.RED}Error loading artistdownloadnameformat from Config.ini: {e}')
+            sys.exit()
+    except Exception as e:
+        Logging.log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='artist', cont_default=True)
+        sys.exit()
+    return gallery_folder
+
+def group_gallery_title(gallery_title, gallery_code, translated_title, original_title) -> str:
+    try:
+        gallery_folder = config.groupdownloadnameformat % locals()
+    except KeyError as e:
+        if (not translated_title and '%(translated_title)s' in config.groupdownloadnameformat) or (not original_title and '%(original_title)s' in config.groupdownloadnameformat):
+            Logging.print_(print_msg=f'{colorama.Fore.RED}Error formatting title with %(translated_title)s and/or %(original_title)s: Title not available in those languages.')
+            raise nhentaiExceptions.InvalidTitleError(gallery_title=gallery_title, gallery_code=gallery_code)
+        else:
+            Logging.print_(print_msg=f'{colorama.Fore.RED}Error loading groupdownloadnameformat from Config.ini: {e}')
+            sys.exit()
+    except Exception as e:
+        Logging.log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='group', cont_default=True)
+        sys.exit()
+    return gallery_folder
+
+def gallery_title(gallery_title, gallery_code, translated_title, original_title) -> str:
+    try:
+        gallery_folder = config.gallerydownloadnameformat % locals()
+    except KeyError as e:
+        if (not translated_title and '%(translated_title)s' in config.gallerydownloadnameformat) or (not original_title and '%(original_title)s' in config.gallerydownloadnameformat):
+            Logging.print_(print_msg=f'{colorama.Fore.RED}Error formatting title with %(translated_title)s and/or %(original_title)s: Title not available in those languages.')
+            raise nhentaiExceptions.InvalidTitleError(gallery_title=gallery_title, gallery_code=gallery_code)
+        else:
+            Logging.print_(print_msg=f'{colorama.Fore.RED}Error loading gallerydownloadnameformat from Config.ini: {e}')
+            sys.exit()
+    except Exception as e:
+        Logging.log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='gallery', cont_default=True)
+        sys.exit()
+    return gallery_folder
+
 
 # Function to validate title i.e: remove/replace special characters
 def validate_title(gallery_title) -> str:
@@ -276,6 +248,7 @@ def validate_title(gallery_title) -> str:
             elif chara == '>':
                 gallery_title = re.sub(chara, ')', gallery_title)
     return gallery_title
+
 
 def set_console_title(title_type=None, input_list_progress=None,artist_name=None, group_name=None, gallery_progress=None, gallery_id=None, download_progress=None, reset=False) -> None:
     global title
