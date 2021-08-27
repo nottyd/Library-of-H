@@ -1,10 +1,14 @@
 import os
 from typing import Union
 
+import colorama
+
 import nhentaiDownloader.Helper as Helper
 from nhentaiDownloader.MetadataHandler import MetadataHandler
 import nhentaiDBManager.DBWriter as DBWriter
 from nhentaiDBManager.DBReader import DBReader
+from nhentaiErrorHandling import Logging, nhentaiExceptions
+
 class GalleriesFilter:
 
     def __init__(self, config=None, type_=None):
@@ -97,8 +101,7 @@ class GalleriesFilter:
         if os.path.isdir(self.config.databaselocation):
             database_location = self.config.databaselocation
         else:
-            Helper.log_and_print(error_family='CONFError', error_type='databaselocation_load_error', cont_default=True)
-            database_location = self.config.default_databaselocation
+            raise nhentaiExceptions.DirectoryExistsError(msg='Error loading databaselocation from config: directory does not exist.', log_type='downloader')
 
         if os.path.isfile(os.path.join(database_location, 'nhentaiDatabase.db')):
             nhen_DBB = DBReader()
@@ -123,8 +126,8 @@ class GalleriesFilter:
             if os.path.isdir(self.config.databaselocation):
                 database_location = self.config.databaselocation
             else:
-                Helper.log_and_print(error_family='CONFError', error_type='databaselocation_load_error', cont_default=True)
-                database_location = self.config.default_databaselocation
+                raise nhentaiExceptions.DirectoryExistsError(msg='Error loading databaselocation from config: directory does not exist.', log_type='downloader')
+
             self.nhen_DBW_f.set_database(database_location=database_location, database_filename='nhentaiDatabase.db')
             self.gallery_metadata_dict = self.comic_galleries_filter(gallery_metadata_dict)
         
@@ -184,8 +187,8 @@ class GalleriesFilter:
             if os.path.isdir(self.config.databaselocation):
                 database_location = self.config.databaselocation
             else:
-                Helper.log_and_print(error_family='CONFError', error_type='databaselocation_load_error', cont_default=True)
-                database_location = self.config.default_databaselocation
+                raise nhentaiExceptions.DirectoryExistsError(msg='Error loading databaselocation from config: directory does not exist.', log_type='downloader')
+
             self.nhen_DBW_f.set_database(database_location=database_location, database_filename='nhentaiDatabase.db')
 
         def page_discrepancy(self, pages_dict) -> Union[str, list]:
