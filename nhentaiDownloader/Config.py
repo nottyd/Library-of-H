@@ -28,9 +28,9 @@ class Config:
         ConfigItems('GeneralSettings', 'groupdownloadlocation', f'.{os.sep}nhentaiDownloaded{os.sep}groups'),
         ConfigItems('GeneralSettings', 'databaselocation', f'.{os.sep}nhentaiDownloaded'),
 
-        ConfigItems('Filenames', 'gallerydownloadnameformat', f'%(gallery_title)s (%(gallery_code)s)'),
-        ConfigItems('Filenames', 'artistdownloadnameformat', f'%(artist_name)s{os.sep}%(gallery_title)s (%(gallery_code)s)'),
-        ConfigItems('Filenames', 'groupdownloadnameformat', f'%(group_name)s{os.sep}%(gallery_title)s (%(gallery_code)s)'),
+        ConfigItems('Filenames', 'gallerydownloadnameformat', f'%(gallery_code)s'),
+        ConfigItems('Filenames', 'artistdownloadnameformat', f'%(artist_name)s{os.sep}%%(gallery_code)s'),
+        ConfigItems('Filenames', 'groupdownloadnameformat', f'%(group_name)s{os.sep}%(gallery_code)s'),
 
         ConfigItems('DownloadSettings', 'overwrite', False)
     ]
