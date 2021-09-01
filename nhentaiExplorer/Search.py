@@ -57,7 +57,7 @@ class Search(SearchBoxWidget):
 
     def set_filters(self):
         filter_option = self.filter_option_combobox.currentText()
-        search_terms = [search_term.strip().replace(' ', '-') for search_term in self.search_edit.text().split(',')]
+        search_terms = [search_term.strip() for search_term in self.search_edit.text().split(',')]
         if search_terms == ['']:
             self.SRCH_set_filters.emit(None, None)
             return

@@ -3,7 +3,7 @@ from typing import Union
 
 import colorama
 
-import nhentaiDownloader.Helper as Helper
+from nhentaiDownloader import Helper
 from nhentaiDownloader.MetadataHandler import MetadataHandler
 import nhentaiDBManager.DBWriter as DBWriter
 from nhentaiDBManager.DBReader import DBReader
@@ -11,19 +11,21 @@ from nhentaiErrorHandling import Logging, nhentaiExceptions
 
 class GalleriesFilter:
 
-    def __init__(self, config=None, type_=None):
+    def __init__(self, config=None):
         self.config = config
-        self.type_ = type_
         self.codes_and_metadata = dict()
 
 # Function to create a {'gallery_title': [metadata]} dictionary for each gallery code found in each artist page
     def metadata_getter(self, gallery_code) -> None:
         self.codes_and_metadata[gallery_code] = MetadataGetter(gallery_code)
 
-    def filter_galleries_titles_getter(self, gallery_codes, type_ = None) -> None:
-        if type_ is None: type_=self.type_
+    def filter_galleries_titles_getter(self, gallery_codes, name) -> None:
         gallery_metadata_dict = {}
-        print(f'Collecting metadata for {type_} galleries...')
+        if name:
+            print_msg = f'Collecting metadata for {name} galleries...'
+        else:
+            print_msg = 'Collecting metadata for gallery...'
+        print(print_msg)
         Helper.print_bar_progress(total=len(gallery_codes), progress=0, msg='Metadata collected for galleries')
         for i, gallery_code in enumerate(gallery_codes, start=1):
             self.metadata_getter(gallery_code)
@@ -37,9 +39,11 @@ class GalleriesFilter:
                 gallery_metadata_dict[gallery_title] = (gallery_before, gallery_after, [gallery_code])
             else:
                 gallery_metadata_dict[gallery_title][2].append(gallery_code)
+
         if self.config.collection:
             collection_filter = self.CollectionsFilter(gallery_metadata_dict=gallery_metadata_dict, codes_and_metadata=self.codes_and_metadata, config=self.config)
             gallery_metadata_dict, self.collections_count = collection_filter.get_items()
+            
         if self.config.duplicate:
             duplicates_filter = self.DuplicatesFilter(self.codes_and_metadata, self.filtered_gallery_codes, config=self.config)
             self.filtered_gallery_codes = duplicates_filter.duplicate_galleries_handler(gallery_metadata_dict)
@@ -49,8 +53,7 @@ class GalleriesFilter:
                     if gallery_code not in self.filtered_gallery_codes:
                         self.filtered_gallery_codes.append(gallery_code)
 
-    def filter_galleries_getter(self, pages, url, type_=None) -> Union [None, list]:
-        if type_ is None: type_=self.type_
+    def filter_galleries_getter(self, pages, url, name=None) -> Union [None, list]:
         self.filtered_gallery_codes = list()
         gallery_codes = []
         for page in range(1, pages+1):
@@ -65,9 +68,9 @@ class GalleriesFilter:
         gallery_codes = [gallery_code for gallery_code in gallery_codes if not self.check_database(get='ids', filter_option='ids', search_term=str(gallery_code), table='nhentaiLibrary', order_by='ids')]
         if len(gallery_codes) != 0:
             if len(gallery_codes) != len_gallery_codes:
-                print(f"{len_gallery_codes-len(gallery_codes)}/{len_gallery_codes} of {type_}'s galleries are already in the database as downloaded.")
+                print(f"{len_gallery_codes-len(gallery_codes)}/{len_gallery_codes} of {name}'s galleries are already in the database as downloaded.")
         else:
-            print(f"All of {type_}'s galleries are already in the database.\n")
+            print(f"All of {name}'s galleries are already in the database.\n")
             return
         len_gallery_codes = len(gallery_codes)
         # Removing gallery_codes that belong to the collection category that have already been filtered in previous runs of the script, IF self.config.collection IS True (i.e. user doesn't want to download collections)
@@ -81,12 +84,13 @@ class GalleriesFilter:
                 print(f"{len_gallery_codes}/{len_gallery_codes} have previously been filtered out as collections.\n")
                 return
         # Removing gallery codes that have already been filtered in previous runs of the script
-        gallery_codes = [gallery_code for gallery_code in gallery_codes if not self.check_database(get='duplicate_id', filter_option='duplicate_id', search_term=str(gallery_code), table='duplicates', order_by='duplicate_id')]
+        if self.config.duplicate:
+            gallery_codes = [gallery_code for gallery_code in gallery_codes if not self.check_database(get='duplicate_id', filter_option='duplicate_id', search_term=str(gallery_code), table='duplicates', order_by='duplicate_id')]
         if len(gallery_codes) != 0:
             if len(gallery_codes) != len_gallery_codes:
                 print(f"{len_gallery_codes-len(gallery_codes)} galleries have previously been filtered out as duplicates.")
                 len_gallery_codes = len(gallery_codes)
-            self.filter_galleries_titles_getter(gallery_codes, type_=type_)
+            self.filter_galleries_titles_getter(gallery_codes, name=name)
             if self.config.collection:
                 print(f'{self.collections_count} collections have been filtered out.')
             if len(self.filtered_gallery_codes) != len_gallery_codes and self.config.duplicate:
