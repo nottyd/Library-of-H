@@ -4,10 +4,10 @@ import platform
 import subprocess
 import re
 import time
-import logging
+import requests
+import urllib
 from typing import Union
 
-import mechanize
 from bs4 import BeautifulSoup
 import colorama
 colorama.init(autoreset=True)
@@ -20,34 +20,24 @@ title = {'program_title': program_title, 'title_type':  None, 'input_list_progre
 
 config = Config()
 
-# Funcction to create Browser object
-def browser_factory() -> mechanize.Browser:
-    br = mechanize.Browser()
-    br.set_handle_robots(False)
-    request = get_request('https://www.nhentai.net')
-    return br
-
 # Function to create beautifulsoup object
-def soup_maker(url) -> Union[BeautifulSoup, str]:
-    request = get_request(url)
-    response = get_response_with_retry(request)
-    response = response.read()
+def soup_maker(url) -> BeautifulSoup:
+    response = get_response_with_retry(url)
+    response = response.text
     soup = BeautifulSoup(response, 'lxml')
     return soup
 
-# Function to get response with mechanize and retry config.retry times
-def get_response_with_retry(request) -> mechanize._response.response_seek_wrapper:
+# Function to get response with requests and retry config.retry times
+def get_response_with_retry(url) -> requests.models.Response:
     errno = 0
-    br = browser_factory()
     for i in range(config.retry+1):
         try:
-           response = br.open(request)
-        except mechanize.HTTPError as e:
+           response = requests.get(url, headers={'User-Agent':config.useragent})
+        except urllib.error.HTTPError as e:
             if e.getcode() in [408, 429, 500, 502, 503, 504]:
                 # 408: Request Timeout; 429: Too Many Requests; 500: Internal Server Error; 502: Bad Gateway; 504: Gateway Timeout;
-                print_msg = f'\n{colorama.Fore.RED}<{str(e)}> Temporary Error\
-                    \n{colorama.Fore.RED}URL => {colorama.Fore.BLUE}{e.url}'
-                Logging.print_(print_msg=print_msg)
+                print(f'\n{colorama.Fore.RED}<{str(e)}> Temporary Error\
+                    \n{colorama.Fore.RED}URL => {colorama.Fore.BLUE}{e.url}')
                 print(f'{colorama.Fore.WHITE}{i+1} try out of {config.retry}.')
                 if i+1 == config.retry+1:
                     print(f'{colorama.Fore.RED}Out of retries.')
@@ -66,11 +56,9 @@ def get_response_with_retry(request) -> mechanize._response.response_seek_wrappe
                         print(f'{i+1} try out of {config.retry}.')
                         break
                     if retry.lower() == 'n':
-                        Logging.log_and_print(level='critical', log_msg=e, print_msg=f'{colorama.Fore.RED}{str(e)}', log_type='downloader')
                         raise
                     print()
                 errno = 10053
-
             elif e.args[0].errno == 2:
                 print(f'{colorama.Fore.RED}{str(e)}')
                 while True:
@@ -80,7 +68,6 @@ def get_response_with_retry(request) -> mechanize._response.response_seek_wrappe
                         print(f'{i+1} try out of {config.retry}.')
                         break
                     if retry.lower() == 'n':
-                        Logging.log_and_print(level='critical', log_msg=e, print_msg=f'{colorama.Fore.RED}{str(e)}', log_type='downloader')
                         raise
                     print()
 
@@ -88,10 +75,6 @@ def get_response_with_retry(request) -> mechanize._response.response_seek_wrappe
                 raise
         else:
             return response
-
-# Function to get request
-def get_request(url) -> mechanize._request.Request:
-    return mechanize.Request(url, None, {'User-Agent':config.useragent})
 
 # Functions for printing progress
 # Function for printing bar progress: [########-------]
@@ -170,66 +153,55 @@ def get_links_and_title(gallery_code=None, artist_name=None, group_name=None) ->
         else:
             gallery_title = validate_title(links_and_title_getter_res[1][1])
         if len(gallery_title) > 250:
-            raise nhentaiExceptions.InvalidTitleError(gallery_title=gallery_title, gallery_code=gallery_code)
+            raise nhentaiExceptions.NameTooLongError(gallery_title=gallery_title, gallery_code=gallery_code)
         gallery_after = validate_title(links_and_title_getter_res[1][2])
 
         if artist_name:
-            gallery_folder = artist_gallery_title(gallery_title, gallery_code, translated_title, original_title)
+            gallery_folder = get_artist_gallery_title(gallery_title, gallery_code, translated_title, original_title, artist_name)
         elif group_name:
-            gallery_folder = artist_gallery_title(gallery_title, gallery_code, translated_title, original_title)
+            gallery_folder = get_group_gallery_title(gallery_title, gallery_code, translated_title, original_title, group_name)
         else:
-            gallery_folder = artist_gallery_title(gallery_title, gallery_code, translated_title, original_title)
+            gallery_folder = get_gallery_title(gallery_title, gallery_code, translated_title, original_title)
 
         if len(gallery_folder.split(os.sep)[-1]) > 250:
-            Logging.log_and_print()
-            Logging.log_and_print(error_family='OSError', error_type='name_too_long', gallery_title=gallery_title, retry=False)
-            return gallery_code, 'name too long', image_links, gallery_folder
+            raise nhentaiExceptions.NameTooLongError(gallery_title=gallery_title, gallery_code=gallery_code, gallery_folder=gallery_folder)
 
         return image_links, gallery_folder
 
-def artist_gallery_title(gallery_title, gallery_code, translated_title, original_title) -> str:
+def get_artist_gallery_title(gallery_title, gallery_code, translated_title, original_title, artist_name) -> str:
     try:
         gallery_folder = config.artistdownloadnameformat % locals()
     except KeyError as e:
         if (not translated_title and '%(translated_title)s' in config.artistdownloadnameformat) or (not original_title and '%(original_title)s' in config.artistdownloadnameformat):
-            Logging.print_(print_msg=f'{colorama.Fore.RED}Error formatting title with %(translated_title)s and/or %(original_title)s: Title not available in those languages.')
-            raise nhentaiExceptions.InvalidTitleError(gallery_title=gallery_title, gallery_code=gallery_code)
+            raise nhentaiExceptions.LanguageNotAvailable(gallery_title=gallery_title, gallery_code=gallery_code)
         else:
-            Logging.print_(print_msg=f'{colorama.Fore.RED}Error loading artistdownloadnameformat from Config.ini: {e}')
-            sys.exit()
+            raise nhentaiExceptions.DownloadNameFormatError(e)
     except Exception as e:
-        Logging.log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='artist', cont_default=True)
-        sys.exit()
+        raise nhentaiExceptions.DownloadNameFormatError(e)
     return gallery_folder
 
-def group_gallery_title(gallery_title, gallery_code, translated_title, original_title) -> str:
+def get_group_gallery_title(gallery_title, gallery_code, translated_title, original_title) -> str:
     try:
         gallery_folder = config.groupdownloadnameformat % locals()
     except KeyError as e:
         if (not translated_title and '%(translated_title)s' in config.groupdownloadnameformat) or (not original_title and '%(original_title)s' in config.groupdownloadnameformat):
-            Logging.print_(print_msg=f'{colorama.Fore.RED}Error formatting title with %(translated_title)s and/or %(original_title)s: Title not available in those languages.')
-            raise nhentaiExceptions.InvalidTitleError(gallery_title=gallery_title, gallery_code=gallery_code)
+            raise nhentaiExceptions.LanguageNotAvailable(gallery_title=gallery_title, gallery_code=gallery_code)
         else:
-            Logging.print_(print_msg=f'{colorama.Fore.RED}Error loading groupdownloadnameformat from Config.ini: {e}')
-            sys.exit()
+            raise nhentaiExceptions.DownloadNameFormatError(e)
     except Exception as e:
-        Logging.log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='group', cont_default=True)
-        sys.exit()
+        raise nhentaiExceptions.DownloadNameFormatError(e)
     return gallery_folder
 
-def gallery_title(gallery_title, gallery_code, translated_title, original_title) -> str:
+def get_gallery_title(gallery_title, gallery_code, translated_title, original_title) -> str:
     try:
         gallery_folder = config.gallerydownloadnameformat % locals()
     except KeyError as e:
         if (not translated_title and '%(translated_title)s' in config.gallerydownloadnameformat) or (not original_title and '%(original_title)s' in config.gallerydownloadnameformat):
-            Logging.print_(print_msg=f'{colorama.Fore.RED}Error formatting title with %(translated_title)s and/or %(original_title)s: Title not available in those languages.')
-            raise nhentaiExceptions.InvalidTitleError(gallery_title=gallery_title, gallery_code=gallery_code)
+            raise nhentaiExceptions.LanguageNotAvailable(gallery_title=gallery_title, gallery_code=gallery_code)
         else:
-            Logging.print_(print_msg=f'{colorama.Fore.RED}Error loading gallerydownloadnameformat from Config.ini: {e}')
-            sys.exit()
+            raise nhentaiExceptions.DownloadNameFormatError(e)
     except Exception as e:
-        Logging.log_and_print(error_family='CONFError', error_Type='downloadname_load_error', error=e, download_type='gallery', cont_default=True)
-        sys.exit()
+        raise nhentaiExceptions.DownloadNameFormatError(e)
     return gallery_folder
 
 

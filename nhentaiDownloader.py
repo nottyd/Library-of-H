@@ -11,7 +11,7 @@ from nhentaiDownloader.DownloadByGalleries import DownloadByGalleries
 from nhentaiDownloader.DownloadByGroup import DownloadByGroup
 from nhentaiDownloader.Config import Config
 import nhentaiDownloader.Helper as Helper
-import nhentaiExceptionsHandling.Logging as Logging
+import nhentaiErrorHandling.Logging as Logging
 
 menu = """Choose a download method:
 1. Download by Galleries
@@ -40,9 +40,9 @@ while True:
                     \nError: {e}'))
                 sys.exit()
 
-            gallery_downloader = DownloadByGalleries(gallery_codes, save_dest)
+            gallery_downloader = DownloadByGalleries(gallery_codes, save_dest, config)
             print()
-            gallery_downloader.download_by_galleries(config)
+            gallery_downloader.download_by_galleries()
             os.chdir(os.path.dirname(__file__))
 
         elif choice == '2':
@@ -61,9 +61,9 @@ while True:
                     \nError: {e}'))
                 sys.exit()
         
-            artist_downloader = DownloadByArtist(artists, save_dest)
+            artist_downloader = DownloadByArtist(artists, save_dest, config)
             print()
-            artist_downloader.download_by_artist(config)
+            artist_downloader.download_by_artist()
             os.chdir(os.path.dirname(__file__))
 
         elif choice == '3':
@@ -82,9 +82,9 @@ while True:
                     \nError: {e}'))
                 sys.exit()
 
-            group_downloader = DownloadByGroup(groups, save_dest)
+            group_downloader = DownloadByGroup(groups, save_dest, config)
             print()
-            group_downloader.download_by_group(config)
+            group_downloader.download_by_group()
             os.chdir(os.path.dirname(__file__))
 
         elif choice == 'x':
@@ -95,5 +95,6 @@ while True:
 
         print()
     except KeyboardInterrupt as e:
+        print()
         print()
         continue

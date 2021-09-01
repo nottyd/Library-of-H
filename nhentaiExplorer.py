@@ -115,6 +115,7 @@ class MainWindow(qtw.QMainWindow):
         self.explorer.layout().addWidget(self.browser)
 
         self.dock = Dock('Explorer')
+        self.dock.hide()
         self.MW_import_signal.connect(lambda: self.search.change_search_state(True))
         self.browser.BRW_browser_item_width_signal.connect(lambda width: self.dock.setMaximumWidth(width+40))
         self.browser.BRW_viewer_change_signal.connect(self.viewer.change_viewer)

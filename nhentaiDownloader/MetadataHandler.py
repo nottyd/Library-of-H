@@ -4,7 +4,7 @@ import sys
 import re
 from typing import Union
 
-import nhentaiDownloader.Helper as Helper
+from nhentaiDownloader import Helper
 import nhentaiDBManager.DBWriter as DBWriter
 
 class MetadataHandler:
@@ -17,7 +17,7 @@ class MetadataHandler:
                 self.soup = Helper.soup_maker(self.gallery_link)
                 self.collection = None
                 if self.soup is None:
-                    sys.exit()
+                    return
             else:
                 self.database_writer()
                 raise Exception(f"metadata.csv already exists. Location: {os.path.abspath('.')}")
