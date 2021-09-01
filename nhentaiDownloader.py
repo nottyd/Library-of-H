@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 import colorama
+
 colorama.init(autoreset=True)
 
 from nhentaiDownloader.DownloadByArtist import DownloadByArtist
@@ -24,9 +25,11 @@ while True:
     try:
         Helper.set_console_title(title_type="menu")
         choice = input(menu).lower()
-        if choice == '1':
+        if choice == "1":
             gallery_codes = []
-            for gallery_code in input('Enter gallery code(s) separated by space: ').split():
+            for gallery_code in input(
+                "Enter gallery code(s) separated by space: "
+            ).split():
                 if gallery_code not in gallery_codes:
                     gallery_codes.append(gallery_code)
 
@@ -35,9 +38,13 @@ while True:
                 if not Path(save_dest).exists():
                     os.makedirs(save_dest)
             except Exception as e:
-                Logging.log_and_print(print(f'{colorama.Fore.RED}Error loading gallerydownloadlocation from nhentaiConfig.ini\
+                Logging.log_and_print(
+                    print(
+                        f"{colorama.Fore.RED}Error loading gallerydownloadlocation from nhentaiConfig.ini\
                     \ngallerydownloadlocation: {config.gallerydownloadlocation}\
-                    \nError: {e}'))
+                    \nError: {e}"
+                    )
+                )
                 sys.exit()
 
             gallery_downloader = DownloadByGalleries(gallery_codes, save_dest, config)
@@ -45,9 +52,11 @@ while True:
             gallery_downloader.download_by_galleries()
             os.chdir(os.path.dirname(__file__))
 
-        elif choice == '2':
+        elif choice == "2":
             artists = []
-            for artist in input('Enter artist name(s) separated by commas: ').split(','):
+            for artist in input("Enter artist name(s) separated by commas: ").split(
+                ","
+            ):
                 if artist not in artists:
                     artists.append(artist.strip().lower())
 
@@ -56,19 +65,23 @@ while True:
                 if not Path(save_dest).exists():
                     os.makedirs(save_dest)
             except Exception as e:
-                Logging.log_and_print(print(f'{colorama.Fore.RED}Error loading artistdownloadlocation from nhentaiConfig.ini\
+                Logging.log_and_print(
+                    print(
+                        f"{colorama.Fore.RED}Error loading artistdownloadlocation from nhentaiConfig.ini\
                     \artistdownloadlocation: {config.artistdownloadlocation}\
-                    \nError: {e}'))
+                    \nError: {e}"
+                    )
+                )
                 sys.exit()
-        
+
             artist_downloader = DownloadByArtist(artists, save_dest, config)
             print()
             artist_downloader.download_by_artist()
             os.chdir(os.path.dirname(__file__))
 
-        elif choice == '3':
+        elif choice == "3":
             groups = []
-            for group in input('Enter group name(s) separated by commas: ').split(','):
+            for group in input("Enter group name(s) separated by commas: ").split(","):
                 if group not in groups:
                     groups.append(group.strip().lower())
 
@@ -77,9 +90,13 @@ while True:
                 if not Path(save_dest).exists():
                     os.makedirs(save_dest)
             except Exception as e:
-                Logging.log_and_print(print(f'{colorama.Fore.RED}Error loading groupdownloadlocation from nhentaiConfig.ini\
+                Logging.log_and_print(
+                    print(
+                        f"{colorama.Fore.RED}Error loading groupdownloadlocation from nhentaiConfig.ini\
                     \groupdownloadlocation: {config.groupdownloadlocation}\
-                    \nError: {e}'))
+                    \nError: {e}"
+                    )
+                )
                 sys.exit()
 
             group_downloader = DownloadByGroup(groups, save_dest, config)
@@ -87,7 +104,7 @@ while True:
             group_downloader.download_by_group()
             os.chdir(os.path.dirname(__file__))
 
-        elif choice == 'x':
+        elif choice == "x":
             sys.exit()
 
         else:

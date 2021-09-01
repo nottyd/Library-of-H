@@ -3,33 +3,46 @@ from PyQt5 import QtCore as qtc
 
 from nhentaiExplorer.CustomWidgets import SearchBoxWidget
 
+
 class Search(SearchBoxWidget):
 
     SRCH_set_filters = qtc.pyqtSignal(object, object)
-    btn_disabled_css = 'background: #772538; color: #757575;'
-    btn_enabled_css = 'background-color: #ed2553; color: #fdf8ff;'
+    btn_disabled_css = "background: #772538; color: #757575;"
+    btn_enabled_css = "background-color: #ed2553; color: #fdf8ff;"
 
     def __init__(self):
         super().__init__()
         self.search()
         self.filter_option = None
         self.search_terms = None
+
     def search(self):
-        self.setFixedHeight(int(0.15*self.height()))
+        self.setFixedHeight(int(0.15 * self.height()))
         self.setLayout(qtw.QFormLayout())
         self.returnPressed.connect(self.set_filters)
-        self.search_edit = qtw.QLineEdit(objectName='EXP_LineEdit')
+        self.search_edit = qtw.QLineEdit(objectName="EXP_LineEdit")
         self.search_edit.setEnabled(False)
-        self.search_edit.setPlaceholderText('Enter search term(s)...')
+        self.search_edit.setPlaceholderText("Enter search term(s)...")
         search_bar = qtw.QHBoxLayout()
 
-        filter_options = ['artists', 'characters', 'ids', 'groups', 'parodies', 'tags', 'titles', 'collections']
-        self.filter_option_combobox = qtw.QComboBox(objectName='EXP_ComboBox')
+        filter_options = [
+            "artists",
+            "characters",
+            "ids",
+            "groups",
+            "parodies",
+            "tags",
+            "titles",
+            "collections",
+        ]
+        self.filter_option_combobox = qtw.QComboBox(objectName="EXP_ComboBox")
         self.filter_option_combobox.setEnabled(False)
         self.filter_option_combobox.addItems(filter_options)
         self.filter_option_combobox.setCurrentIndex(0)
 
-        self.search_btn = qtw.QPushButton('Search', clicked=self.set_filters, objectName='EXP_PushButton')
+        self.search_btn = qtw.QPushButton(
+            "Search", clicked=self.set_filters, objectName="EXP_PushButton"
+        )
         self.search_btn.setEnabled(False)
         self.search_btn.setStyleSheet(self.btn_disabled_css)
         search_bar.addWidget(self.filter_option_combobox)
@@ -57,8 +70,10 @@ class Search(SearchBoxWidget):
 
     def set_filters(self):
         filter_option = self.filter_option_combobox.currentText()
-        search_terms = [search_term.strip() for search_term in self.search_edit.text().split(',')]
-        if search_terms == ['']:
+        search_terms = [
+            search_term.strip() for search_term in self.search_edit.text().split(",")
+        ]
+        if search_terms == [""]:
             self.SRCH_set_filters.emit(None, None)
             return
         self.SRCH_set_filters.emit(filter_option, search_terms)
