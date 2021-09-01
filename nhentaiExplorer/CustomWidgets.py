@@ -2,11 +2,12 @@ from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtGui as qtg
 from PyQt5 import QtCore as qtc
 
+
 class ImageScrollArea(qtw.QScrollArea):
 
     resized_constant = 10
-    
-    def __init__(self, main_window=None, objectName=''):
+
+    def __init__(self, main_window=None, objectName=""):
         super().__init__()
         self.objectName = objectName
         self.main_window = main_window
@@ -24,12 +25,14 @@ class ImageScrollArea(qtw.QScrollArea):
         if self.main_window.control_modifier:
             if event.angleDelta().y() == 120:
                 self.resized += ImageScrollArea.resized_constant
-                if self.resized >= 90: self.resized = 90
+                if self.resized >= 90:
+                    self.resized = 90
                 self.resize_image()
                 self.image_label.setPixmap(self.current_image_pixmap)
             elif event.angleDelta().y() == -120:
                 self.resized -= ImageScrollArea.resized_constant
-                if self.resized <= -90: self.resized = -90
+                if self.resized <= -90:
+                    self.resized = -90
                 self.resize_image()
                 self.image_label.setPixmap(self.current_image_pixmap)
         else:
@@ -37,24 +40,31 @@ class ImageScrollArea(qtw.QScrollArea):
 
     def scroll_(self, y):
         if y == -120:
-            if self.scroll_value + self.scroll_constant >= self.verticalScrollBar().maximum():
+            if (
+                self.scroll_value + self.scroll_constant
+                >= self.verticalScrollBar().maximum()
+            ):
                 self.scroll_value = self.verticalScrollBar().maximum()
             else:
                 self.scroll_value += self.scroll_constant
         elif y == 120:
-            if self.scroll_value - self.scroll_constant <= self.verticalScrollBar().minimum():
+            if (
+                self.scroll_value - self.scroll_constant
+                <= self.verticalScrollBar().minimum()
+            ):
                 self.scroll_value = self.verticalScrollBar().minimum()
             else:
                 self.scroll_value -= self.scroll_constant
         self.verticalScrollBar().setValue(self.scroll_value)
 
+
 class Dock(qtw.QDockWidget):
-    def __init__(self, title, objectName=''):
+    def __init__(self, title, objectName=""):
         super().__init__()
         self.setWindowTitle(title)
         self.objectName = objectName
         self.setFocusPolicy(qtc.Qt.NoFocus)
-    
+
     def setObjectName(self, name):
         self.objectName = name
 
@@ -72,19 +82,19 @@ class BrowserItemWidget(qtw.QWidget):
         self.setAttribute(qtc.Qt.WA_StyledBackground, True)
         # self.setAttribute(qtc.Qt.WA_Hover, True)
         # self.setMouseTracking(True)
-    
+
     def set_location(self, location):
         self.location = location
 
     def set_index(self, index):
         self.index = index
-    
+
     def mousePressEvent(self, event):
         self.BIW_viewer_change_signal.emit(self.location, self.index)
 
     def enterEvent(self, event):
         self.BIW_hover_signal.emit(1, self.index)
-    
+
     def leaveEvent(self, event):
         self.BIW_hover_signal.emit(0, self.index)
 

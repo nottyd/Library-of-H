@@ -7,13 +7,16 @@ from PIL import ImageQt, Image
 
 from nhentaiExplorer.CustomWidgets import ImageScrollArea
 
+
 class Viewer(ImageScrollArea):
     def __init__(self, main_window):
         self.resized = 0
         super().__init__()
         self.set_main_window(main_window)
         self.change_viewer()
-        self.image_label = qtw.QLabel(alignment=qtc.Qt.AlignCenter, objectName='MW_Label')
+        self.image_label = qtw.QLabel(
+            alignment=qtc.Qt.AlignCenter, objectName="MW_Label"
+        )
         self.setWidget(self.image_label)
         self.setWidgetResizable(True)
         self.setVerticalScrollBarPolicy(qtc.Qt.ScrollBarAlwaysOff)
@@ -22,15 +25,24 @@ class Viewer(ImageScrollArea):
         self.setFocusPolicy(qtc.Qt.NoFocus)
 
     def image_handler(self):
-        self.images = sorted([image for image in os.listdir(self.location) if os.path.isfile(os.path.join(self.location, image)) and not image.endswith('.csv')],
-         key=lambda image: int(image.split(os.extsep)[0]))
+        self.images = sorted(
+            [
+                image
+                for image in os.listdir(self.location)
+                if os.path.isfile(os.path.join(self.location, image))
+                and not image.endswith(".csv")
+            ],
+            key=lambda image: int(image.split(os.extsep)[0]),
+        )
 
     def set_viewer(self, location, image_name):
         self.location = location
         self.current_image_name = image_name
         self.image_handler()
-        self.current_image_original = Image.open(os.path.join(self.location, self.current_image_name))
-        self.current_image_original = self.current_image_original.convert('RGB')
+        self.current_image_original = Image.open(
+            os.path.join(self.location, self.current_image_name)
+        )
+        self.current_image_original = self.current_image_original.convert("RGB")
         self.current_image_qt = ImageQt.ImageQt(self.current_image_original)
         self.current_image_pixmap = qtg.QPixmap.fromImage(self.current_image_qt)
         self.image_label.setPixmap(self.current_image_pixmap)
@@ -41,8 +53,10 @@ class Viewer(ImageScrollArea):
         self.location = location
         self.image_handler()
         self.current_image_name = self.images[0]
-        self.current_image_original = Image.open(os.path.join(self.location, self.current_image_name))
-        self.current_image_original = self.current_image_original.convert('RGB')
+        self.current_image_original = Image.open(
+            os.path.join(self.location, self.current_image_name)
+        )
+        self.current_image_original = self.current_image_original.convert("RGB")
         self.current_image_qt = ImageQt.ImageQt(self.current_image_original)
         self.current_image_pixmap = qtg.QPixmap.fromImage(self.current_image_qt)
         self.image_label.setPixmap(self.current_image_pixmap)
@@ -53,17 +67,33 @@ class Viewer(ImageScrollArea):
         self.current_image_pixmap = qtg.QPixmap.fromImage(self.current_image_qt)
         if self.resized < 0:
             self.current_image_pixmap = self.current_image_pixmap.scaled(
-                int(self.current_image_original.width - (abs(self.resized)/100 * self.current_image_original.width))
-                , int(self.current_image_original.height - (abs(self.resized)/100 * self.current_image_original.height))
-                , qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation)
+                int(
+                    self.current_image_original.width
+                    - (abs(self.resized) / 100 * self.current_image_original.width)
+                ),
+                int(
+                    self.current_image_original.height
+                    - (abs(self.resized) / 100 * self.current_image_original.height)
+                ),
+                qtc.Qt.KeepAspectRatio,
+                qtc.Qt.SmoothTransformation,
+            )
             # self.current_image_qt = ImageQt.ImageQt(self.current_image)
             # self.current_image_pixmap = qtg.QPixmap.fromImage(self.current_image_qt)
         elif self.resized > 0:
             self.current_image = self.current_image_original.copy()
             self.current_image_pixmap = self.current_image_pixmap.scaled(
-                int((abs(self.resized)/100 * self.current_image_original.width) + self.current_image_original.width)
-                , int((abs(self.resized)/100 * self.current_image_original.height) + self.current_image_original.height)
-                , qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation)
+                int(
+                    (abs(self.resized) / 100 * self.current_image_original.width)
+                    + self.current_image_original.width
+                ),
+                int(
+                    (abs(self.resized) / 100 * self.current_image_original.height)
+                    + self.current_image_original.height
+                ),
+                qtc.Qt.KeepAspectRatio,
+                qtc.Qt.SmoothTransformation,
+            )
             # self.current_image_qt = ImageQt.ImageQt(self.current_image)
             # self.current_image_pixmap = qtg.QPixmap.fromImage(self.current_image_qt)
 
@@ -72,9 +102,11 @@ class Viewer(ImageScrollArea):
         if direction == qtc.Qt.Key_Left:
             if current_index == 0:
                 return
-            self.current_image_name = self.images[current_index-1]
-            self.current_image_original = Image.open(os.path.join(self.location, self.current_image_name))
-            self.current_image_original = self.current_image_original.convert('RGB')
+            self.current_image_name = self.images[current_index - 1]
+            self.current_image_original = Image.open(
+                os.path.join(self.location, self.current_image_name)
+            )
+            self.current_image_original = self.current_image_original.convert("RGB")
             self.current_image_qt = ImageQt.ImageQt(self.current_image_original)
             self.current_image_pixmap = qtg.QPixmap.fromImage(self.current_image_qt)
             if self.resized != 0:
@@ -83,11 +115,13 @@ class Viewer(ImageScrollArea):
             self.scroll_value = 0
             self.verticalScrollBar().setValue(self.scroll_value)
         if direction == qtc.Qt.Key_Right:
-            if current_index == len(self.images)-1:
+            if current_index == len(self.images) - 1:
                 return
-            self.current_image_name = self.images[current_index+1]
-            self.current_image_original = Image.open(os.path.join(self.location, self.current_image_name))
-            self.current_image_original = self.current_image_original.convert('RGB')
+            self.current_image_name = self.images[current_index + 1]
+            self.current_image_original = Image.open(
+                os.path.join(self.location, self.current_image_name)
+            )
+            self.current_image_original = self.current_image_original.convert("RGB")
             self.current_image_qt = ImageQt.ImageQt(self.current_image_original)
             self.current_image_pixmap = qtg.QPixmap.fromImage(self.current_image_qt)
             if self.resized != 0:

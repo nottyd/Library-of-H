@@ -6,16 +6,26 @@ from nhentaiDownloader import Helper
 from nhentaiDownloader.MetadataHandler import MetadataHandler
 from nhentaiErrorHandling import nhentaiExceptions
 
-def galleries_downloader(*gallery_codes, save_dest, config, gallery_folder=None, artist_name=None, group_name=None):
+
+def galleries_downloader(
+    *gallery_codes,
+    save_dest,
+    config,
+    gallery_folder=None,
+    artist_name=None,
+    group_name=None,
+):
     os.chdir(save_dest)
     for index, gallery_code in enumerate(gallery_codes, start=1):
         try:
-            get_links_and_title_res = Helper.get_links_and_title(gallery_code, artist_name=artist_name, group_name=group_name)
+            get_links_and_title_res = Helper.get_links_and_title(
+                gallery_code, artist_name=artist_name, group_name=group_name
+            )
         except nhentaiExceptions.InvalidError:
             continue
         except Exception as e:
-            print('this', e)
-            print('this', dir(e))
+            print("this", e)
+            print("this", dir(e))
             sys.exit()
 
         if not gallery_folder is None:
@@ -23,10 +33,17 @@ def galleries_downloader(*gallery_codes, save_dest, config, gallery_folder=None,
         else:
             image_links = get_links_and_title_res[0]
             gallery_folder = get_links_and_title_res[1]
-        print(f'Downloading {gallery_folder}...')
-        gallery_progress = f'[{index} of {len(gallery_codes)}]'
-        Helper.set_console_title(gallery_progress=gallery_progress, gallery_id=gallery_code)
-        Downloader.downloader(image_links=image_links, save_dest=save_dest , folder=gallery_folder, config=config)
+        print(f"Downloading {gallery_folder}...")
+        gallery_progress = f"[{index} of {len(gallery_codes)}]"
+        Helper.set_console_title(
+            gallery_progress=gallery_progress, gallery_id=gallery_code
+        )
+        Downloader.downloader(
+            image_links=image_links,
+            save_dest=save_dest,
+            folder=gallery_folder,
+            config=config,
+        )
 
         metadata = MetadataHandler(gallery_code, config=config)
         try:

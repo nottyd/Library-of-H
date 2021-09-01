@@ -22,9 +22,9 @@ class MainWindow(qtw.QMainWindow):
         self.location = None
         self.control_modifier = False
         super().__init__()
-        self.setWindowTitle('nhentaiExplorer')
-        self.setObjectName('MainWindow')
-        self.main_widget = qtw.QWidget(objectName='W_Widget')
+        self.setWindowTitle("nhentaiExplorer")
+        self.setObjectName("MainWindow")
+        self.main_widget = qtw.QWidget(objectName="W_Widget")
         self.main_widget.setLayout(qtw.QVBoxLayout())
         self.main_widget.layout().setSpacing(0)
         self.setCentralWidget(self.main_widget)
@@ -34,9 +34,9 @@ class MainWindow(qtw.QMainWindow):
         self.set_last_session_settings()
         self.main_widget.layout().addWidget(self.menu_widget)
         self.main_widget.layout().addWidget(self.main_window)
-        self.main_widget.layout().setContentsMargins(0,0,0,0)
+        self.main_widget.layout().setContentsMargins(0, 0, 0, 0)
 
-        with open(os.sep.join(['.', "nhentaiExplorer", "stylesheet.css"])) as f:
+        with open(os.sep.join([".", "nhentaiExplorer", "stylesheet.css"])) as f:
             self.setStyleSheet(f.read())
             pass
         self.show()
@@ -47,10 +47,12 @@ class MainWindow(qtw.QMainWindow):
         if settings.Window__last_session_isMaximized.__get__():
             self.setWindowState(qtc.Qt.WindowMaximized)
         else:
-            self.setGeometry(settings.Window__last_session_x.__get__(),
-                        settings.Window__last_session_y.__get__(),
-                        settings.Window__last_session_width.__get__(),
-                        settings.Window__last_session_height.__get__())
+            self.setGeometry(
+                settings.Window__last_session_x.__get__(),
+                settings.Window__last_session_y.__get__(),
+                settings.Window__last_session_width.__get__(),
+                settings.Window__last_session_height.__get__(),
+            )
 
         # Viewer
         last_session_image = settings.Viewer__last_session_image.__get__()
@@ -58,38 +60,62 @@ class MainWindow(qtw.QMainWindow):
             last_session_image = os.path.split(last_session_image)
             last_session_image_directory = os.path.join(*last_session_image[:-1])
             last_session_image_name = last_session_image[-1]
-            self.viewer.set_viewer(last_session_image_directory, last_session_image_name)
+            self.viewer.set_viewer(
+                last_session_image_directory, last_session_image_name
+            )
 
         # Explorer
-        self.database_file_location = settings.Explorer__last_session_database_file.__get__()
+        self.database_file_location = (
+            settings.Explorer__last_session_database_file.__get__()
+        )
         if self.database_file_location:
             self.set_database_file()
 
         # Search
-        last_session_browser_page = settings.Browser__last_session_browser_page.__get__()
-        last_session_filter_option = settings.Search__last_session_filter_option.__get__()
+        last_session_browser_page = (
+            settings.Browser__last_session_browser_page.__get__()
+        )
+        last_session_filter_option = (
+            settings.Search__last_session_filter_option.__get__()
+        )
         last_session_search_terms = settings.Search__last_session_search_terms.__get__()
-        if all(item for item in [last_session_filter_option, last_session_search_terms]):
-            self.search.search_edit.setText(', '.join(last_session_search_terms))
-            self.search.filter_option_combobox.setCurrentText(last_session_filter_option)
-            self.browser.set_filters(filter_option=last_session_filter_option, search_terms=last_session_search_terms, page_number=last_session_browser_page)
+        if all(
+            item for item in [last_session_filter_option, last_session_search_terms]
+        ):
+            self.search.search_edit.setText(", ".join(last_session_search_terms))
+            self.search.filter_option_combobox.setCurrentText(
+                last_session_filter_option
+            )
+            self.browser.set_filters(
+                filter_option=last_session_filter_option,
+                search_terms=last_session_search_terms,
+                page_number=last_session_browser_page,
+            )
         else:
             # Browser
             if last_session_browser_page:
-                self.browser.update_browser_page_number(page_number=last_session_browser_page)
+                self.browser.update_browser_page_number(
+                    page_number=last_session_browser_page
+                )
 
-        last_session_browser_selection = settings.Browser__last_session_browser_selection.__get__()
+        last_session_browser_selection = (
+            settings.Browser__last_session_browser_selection.__get__()
+        )
         if isinstance(last_session_browser_selection, int):
             self.browser.selection_changed(index=last_session_browser_selection)
 
     def menubar(self):
-        self.menu_widget = qtw.QWidget(objectName='W_Widget')
+        self.menu_widget = qtw.QWidget(objectName="W_Widget")
         self.menu_widget.setLayout(qtw.QHBoxLayout())
-        self.menu_widget.layout().setContentsMargins(0,0,0,0)
+        self.menu_widget.layout().setContentsMargins(0, 0, 0, 0)
         self.menu_widget.layout().setSpacing(0)
         self.menu_widget.layout().setAlignment(qtc.Qt.AlignLeft)
-        import_btn = qtw.QPushButton('Import', clicked=self.import_database, objectName='MW_PushButtons')
-        explorer_btn = qtw.QPushButton('Explorer', clicked=self.show_hide_explorer, objectName='MW_PushButtons')
+        import_btn = qtw.QPushButton(
+            "Import", clicked=self.import_database, objectName="MW_PushButtons"
+        )
+        explorer_btn = qtw.QPushButton(
+            "Explorer", clicked=self.show_hide_explorer, objectName="MW_PushButtons"
+        )
         import_btn.setFixedWidth(70)
         explorer_btn.setFixedWidth(70)
         self.menu_widget.layout().addWidget(import_btn)
@@ -114,10 +140,12 @@ class MainWindow(qtw.QMainWindow):
         self.explorer.layout().addWidget(self.search)
         self.explorer.layout().addWidget(self.browser)
 
-        self.dock = Dock('Explorer')
+        self.dock = Dock("Explorer")
         self.dock.hide()
         self.MW_import_signal.connect(lambda: self.search.change_search_state(True))
-        self.browser.BRW_browser_item_width_signal.connect(lambda width: self.dock.setMaximumWidth(width+40))
+        self.browser.BRW_browser_item_width_signal.connect(
+            lambda width: self.dock.setMaximumWidth(width + 40)
+        )
         self.browser.BRW_viewer_change_signal.connect(self.viewer.change_viewer)
         self.dock.setTitleBarWidget(qtw.QWidget())
         self.main_window.setFocusPolicy(qtc.Qt.StrongFocus)
@@ -133,7 +161,9 @@ class MainWindow(qtw.QMainWindow):
         self.MW_close_signal.connect(self.browser.QThread_close.emit)
 
     def import_database(self):
-        self.database_file_location = qtw.QFileDialog.getOpenFileName(self, 'Import database', os.path.abspath('.'), 'database files (*.db)')
+        self.database_file_location = qtw.QFileDialog.getOpenFileName(
+            self, "Import database", os.path.abspath("."), "database files (*.db)"
+        )
         self.database_file_location = self.database_file_location[0]
         if not self.database_file_location:
             return
@@ -169,7 +199,7 @@ class MainWindow(qtw.QMainWindow):
         if self.control_modifier:
             if event.key() == qtc.Qt.Key_E:
                 self.show_hide_explorer()
-    
+
     def keyReleaseEvent(self, event):
         if event.key() == qtc.Qt.Key_Control:
             self.control_modifier = False
@@ -185,25 +215,40 @@ class MainWindow(qtw.QMainWindow):
         settings.Window__last_session_y.__set__(self.y())
 
         # Explorer
-        settings.Browser__last_session_browser_selection.__set__(self.browser.current_browser_items_index)
-        settings.Browser__last_session_browser_page.__set__(self.browser.current_page_number)
+        settings.Browser__last_session_browser_selection.__set__(
+            self.browser.current_browser_items_index
+        )
+        settings.Browser__last_session_browser_page.__set__(
+            self.browser.current_page_number
+        )
         try:
-            settings.Explorer__last_session_database_file.__set__(self.database_file_location)
+            settings.Explorer__last_session_database_file.__set__(
+                self.database_file_location
+            )
         except AttributeError:
             pass
-        settings.Browser__last_session_browser_page.__set__(self.browser.current_page_number)
+        settings.Browser__last_session_browser_page.__set__(
+            self.browser.current_page_number
+        )
 
         # Search
-        settings.Search__last_session_filter_option.__set__(str(self.browser.filter_option))
-        settings.Search__last_session_search_terms.__set__(str(self.browser.search_terms))
+        settings.Search__last_session_filter_option.__set__(
+            str(self.browser.filter_option)
+        )
+        settings.Search__last_session_search_terms.__set__(
+            str(self.browser.search_terms)
+        )
 
         # Viewer
         try:
-            settings.Viewer__last_session_image.__set__(os.path.join(self.viewer.location, self.viewer.current_image_name))
+            settings.Viewer__last_session_image.__set__(
+                os.path.join(self.viewer.location, self.viewer.current_image_name)
+            )
         except AttributeError:
             pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = qtw.QApplication(sys.argv)
     mw = MainWindow()
     sys.exit(app.exec_())
