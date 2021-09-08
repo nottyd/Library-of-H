@@ -13,56 +13,58 @@ from nhentaiErrorHandling.Logging import StaticVariables
 from nhentaiErrorHandling.ExceptionHandling import exception_handling
 
 
-class DownloadByGroup:
-    def __init__(self, groups, save_dest, config):
-        self.groups = groups
+class DownloadArtist:
+    def __init__(self, artists, save_dest, config):
+        self.artists = artists
         self.save_dest = save_dest
         self.config = config
 
-    def download_by_group(self) -> None:
-        for index, group in enumerate(self.groups, start=1):
-            group_name = group.capitalize()
+    def download_by_artist(self) -> None:
+        for index, artist in enumerate(self.artists, start=1):
+            artist_name = artist.capitalize()
 
-            input_list_progress = f"[{index} of {len(self.groups)}]"
+            input_list_progress = f"[{index} of {len(self.artists)}]"
             Helper.set_console_title(
                 input_list_progress=input_list_progress,
-                group_name=group_name,
+                artist_name=artist_name,
                 reset=True,
             )
 
-            self.url = "https://www.nhentai.net/group/" + re.sub(" ", "-", group)
+            self.url = "https://www.nhentai.net/artist/" + re.sub(" ", "-", artist)
             try:
-                group_soup = Helper.soup_maker(self.url)
-            except nhentaiExceptions.nhentaiExceptions as e:
-                continue
-            except Exception as e:
+                artist_soup = Helper.soup_maker(self.url)
+            except BaseException as e:
+                print(e)
+                print(type(e))
                 exception_handling(e)
                 continue
 
             filter_ = GalleriesFilter(self.config)
-            os.chdir(self.save_dest)
             try:
-                pages = group_soup.find_all("a", class_="last")[0].get("href")
+                pages = artist_soup.find_all("a", class_="last")[0].get("href")
             except IndexError:
                 pages = 1
             else:
                 pages = int(pages[re.search("=", pages).end() :])
             final_gallery_codes = filter_.filter_galleries_getter(
-                pages, self.url, name=group_name
+                pages, self.url, name=artist_name
             )
             if final_gallery_codes != None:
                 GalleriesDownloader.galleries_downloader(
                     *final_gallery_codes,
                     save_dest=self.save_dest,
                     config=self.config,
-                    group_name=group_name,
+                    artist_name=artist_name,
                 )
 
         self.handle_errors()
 
     def handle_errors(self):
-        if len(StaticVariables.name_too_long.keys()) > 0:
-            for group_name, gallery_codes_and_folders in self.name_too_long.items():
+        if StaticVariables.name_too_long.keys():
+            for (
+                artist_name,
+                gallery_codes_and_folders,
+            ) in StaticVariables.name_too_long.items():
                 for gallery_code_and_folder in gallery_codes_and_folders:
                     Helper.log_and_print(
                         error_family="OSError",
@@ -73,11 +75,11 @@ class DownloadByGroup:
                     GalleriesDownloader.galleries_downloader(
                         gallery_folder=gallery_folder,
                         gallery_codes=[gallery_code_and_folder[0]],
-                        group_name=group_name,
+                        artist_name=artist_name,
                     )
 
-        if len(StaticVariables.invalid_groups) > 0:
-            for invalid_group in self.invalid_groups:
+        if StaticVariables.invalid_artists:
+            for invalid_artist in StaticVariables.invalid_artists:
                 print(
-                    f"{colorama.Fore.RED}Invalid group: {colorama.Fore.BLUE}{invalid_group}"
+                    f"{colorama.Fore.RED}Invalid artist: {colorama.Fore.BLUE}{invalid_artist}"
                 )

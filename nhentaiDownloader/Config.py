@@ -47,7 +47,7 @@ class Config:
         ConfigItems(
             "Filenames",
             "artistdownloadnameformat",
-            f"%(artist_name)s{os.sep}%%(gallery_code)s",
+            f"%(artist_name)s{os.sep}%(gallery_code)s",
         ),
         ConfigItems(
             "Filenames",

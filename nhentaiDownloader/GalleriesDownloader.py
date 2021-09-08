@@ -5,6 +5,7 @@ from nhentaiDownloader import DownloadHandler as Downloader
 from nhentaiDownloader import Helper
 from nhentaiDownloader.MetadataHandler import MetadataHandler
 from nhentaiErrorHandling import nhentaiExceptions
+from nhentaiErrorHandling.ExceptionHandling import exception_handling
 
 
 def galleries_downloader(
@@ -21,12 +22,10 @@ def galleries_downloader(
             get_links_and_title_res = Helper.get_links_and_title(
                 gallery_code, artist_name=artist_name, group_name=group_name
             )
-        except nhentaiExceptions.InvalidError:
-            continue
         except Exception as e:
-            print("this", e)
-            print("this", dir(e))
-            sys.exit()
+            print("yep", e)
+            exception_handling(e)
+            continue
 
         if not gallery_folder is None:
             pass

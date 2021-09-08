@@ -1,1 +1,4 @@
 2021-08-27 09:25:50,811 - nhentaiDownloader - CRITICAL - <urlopen error EOF occurred in violation of protocol (_ssl.c:1123)>
+2021-09-06 23:47:17,710 - nhentaiDownloader - CRITICAL - Error loading artistdownloadnameformat from Config.ini
+2021-09-08 17:21:16,065 - nhentaiDownloader - WARNING - Page not found. URL => https://nhentai.net/artist/fewafaewgh/
+2021-09-08 17:21:52,280 - nhentaiDownloader - WARNING - Page not found. URL => https://nhentai.net/artist/gaewf/

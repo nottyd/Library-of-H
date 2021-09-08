@@ -9,7 +9,7 @@ from nhentaiDownloader import GalleriesDownloader
 from nhentaiErrorHandling.Logging import StaticVariables
 
 
-class DownloadByGalleries:
+class DownloadGallery:
     def __init__(self, gallery_codes, save_dest, config):
         self.config = config
         self.gallery_codes = gallery_codes
