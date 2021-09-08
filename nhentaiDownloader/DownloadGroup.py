@@ -33,14 +33,13 @@ class DownloadGroup:
             self.url = "https://www.nhentai.net/group/" + re.sub(" ", "-", group)
             try:
                 group_soup = Helper.soup_maker(self.url)
-            except nhentaiExceptions.nhentaiExceptions as e:
-                continue
-            except Exception as e:
+            except BaseException as e:
+                print(e)
+                print(type(e))
                 exception_handling(e)
                 continue
 
             filter_ = GalleriesFilter(self.config)
-            os.chdir(self.save_dest)
             try:
                 pages = group_soup.find_all("a", class_="last")[0].get("href")
             except IndexError:
@@ -61,8 +60,11 @@ class DownloadGroup:
         self.handle_errors()
 
     def handle_errors(self):
-        if len(StaticVariables.name_too_long.keys()) > 0:
-            for group_name, gallery_codes_and_folders in self.name_too_long.items():
+        if StaticVariables.name_too_long.keys():
+            for (
+                group_name,
+                gallery_codes_and_folders,
+            ) in StaticVariables.name_too_long.items():
                 for gallery_code_and_folder in gallery_codes_and_folders:
                     Helper.log_and_print(
                         error_family="OSError",
@@ -76,8 +78,8 @@ class DownloadGroup:
                         group_name=group_name,
                     )
 
-        if len(StaticVariables.invalid_groups) > 0:
-            for invalid_group in self.invalid_groups:
+        if StaticVariables.invalid_groups:
+            for invalid_group in StaticVariables.invalid_groups:
                 print(
                     f"{colorama.Fore.RED}Invalid group: {colorama.Fore.BLUE}{invalid_group}"
                 )

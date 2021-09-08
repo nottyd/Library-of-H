@@ -90,7 +90,7 @@ def downloader(image_links, save_dest, folder, config) -> None:
 
 def _write_to_disk(image_link, config, image_name, len_image_links, index):
     with requests.get(
-        image_link, headers={"User-Agent": config.useragent}, stream=True
+        image_link, headers={"User-Agent": config.useragent}, stream=True, timeout=10
     ) as online_image:
         online_image.raise_for_status()
         with open(image_name, "wb") as f:
