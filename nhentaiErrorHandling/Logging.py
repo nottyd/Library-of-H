@@ -1,4 +1,8 @@
 import logging
+import os
+import sys
+
+_log_location = os.path.abspath(f"{os.path.dirname(__file__)}{os.sep}..{os.sep}logs")
 
 
 class StaticVariables:
@@ -20,7 +24,7 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 def _downloader_logging() -> logging.Logger:
     downloader_logger = logging.getLogger("nhentaiDownloader")
-    downloader_file_handler = logging.FileHandler("./logs/DownloaderLogs.log")
+    downloader_file_handler = logging.FileHandler(f"{_log_location}/DownloaderLogs.log")
     downloader_file_handler.setFormatter(formatter)
     downloader_logger.addHandler(downloader_file_handler)
     return downloader_logger
@@ -28,7 +32,7 @@ def _downloader_logging() -> logging.Logger:
 
 def _explorer_logging() -> logging.Logger:
     explorer_logger = logging.getLogger("nhentaiExplorer")
-    explorer_file_handler = logging.FileHandler("./logs/ExplorerLogs.log")
+    explorer_file_handler = logging.FileHandler(f"{_log_location}/ExplorerLogs.log")
     explorer_file_handler.setFormatter(formatter)
     explorer_logger.addHandler(explorer_file_handler)
     return explorer_logger
@@ -36,7 +40,7 @@ def _explorer_logging() -> logging.Logger:
 
 def _dbmanager_logging() -> logging.Logger:
     dbmanager_logger = logging.getLogger("nhentaiDBManager")
-    dbmanager_file_handler = logging.FileHandler("./logs/DBManagerLogs.log")
+    dbmanager_file_handler = logging.FileHandler(f"{_log_location}/DBManagerLogs.log")
     dbmanager_file_handler.setFormatter(formatter)
     dbmanager_logger.addHandler(dbmanager_file_handler)
     return dbmanager_logger
@@ -50,6 +54,8 @@ def log_and_print(level, log_type, log_msg=None, print_msg=None) -> None:
 
 
 def log(level, log_msg, log_type=""):
+    if not os.path.exists(_log_location):
+        os.mkdir(_log_location)
     if log_type == "downloader":
         logger = _downloader_logging()
     if log_type == "explorer":

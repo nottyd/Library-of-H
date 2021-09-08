@@ -44,54 +44,58 @@ def get_response_with_retry(url) -> requests.models.Response:
     for i in range(config.retry + 1):
         try:
             response = requests.get(url, headers={"User-Agent": config.useragent})
-        except urllib.error.HTTPError as e:
-            if e.getcode() in [408, 429, 500, 502, 503, 504]:
+        except Exception:
+            raise
+        else:
+            if response.ok:
+                return response
+            elif response.status_code in [408, 429, 500, 502, 503, 504]:
                 # 408: Request Timeout; 429: Too Many Requests; 500: Internal Server Error; 502: Bad Gateway; 504: Gateway Timeout;
                 print(
-                    f"\n{colorama.Fore.RED}<{str(e)}> Temporary Error\
-                    \n{colorama.Fore.RED}URL => {colorama.Fore.BLUE}{e.url}"
+                    f"\n{colorama.Fore.RED}<{str(response.status_code)}> Temporary Error\
+                    \n{colorama.Fore.RED}URL => {colorama.Fore.BLUE}{response.url}"
                 )
                 print(f"{colorama.Fore.WHITE}{i+1} try out of {config.retry}.")
-                if i + 1 == config.retry + 1:
+                if i == config.retry:
                     print(f"{colorama.Fore.RED}Out of retries.")
-                    raise nhentaiExceptions.TimeoutError(e.url)
+                    raise nhentaiExceptions.TimeoutError(response.url)
                 time.sleep(config.retrywait)
             else:
-                raise
+                print("or maybe here")
+                raise response.raise_for_status()
 
-        except OSError as e:
-            if e.args[0].errno == 10053 or errno == 10053:
-                print(f"{colorama.Fore.RED}{str(e)}")
-                while True:
-                    print(
-                        f"{colorama.Fore.WHITE}Would you like to retry?(y/n) ", end=""
-                    )
-                    retry = input()
-                    if retry.lower() == "y":
-                        print(f"{i+1} try out of {config.retry}.")
-                        break
-                    if retry.lower() == "n":
-                        raise
-                    print()
-                errno = 10053
-            elif e.args[0].errno == 2:
-                print(f"{colorama.Fore.RED}{str(e)}")
-                while True:
-                    print(
-                        f"{colorama.Fore.WHITE}Would you like to retry?(y/n) ", end=""
-                    )
-                    retry = input()
-                    if retry.lower() == "y":
-                        print(f"{i+1} try out of {config.retry}.")
-                        break
-                    if retry.lower() == "n":
-                        raise
-                    print()
+        # except OSError as e:
+        #     if e.args[0].errno == 10053 or errno == 10053:
+        #         print(f"{colorama.Fore.RED}{str(e)}")
+        #         while True:
+        #             print(
+        #                 f"{colorama.Fore.WHITE}Would you like to retry?(y/n) ", end=""
+        #             )
+        #             retry = input()
+        #             if retry.lower() == "y":
+        #                 print(f"{i+1} try out of {config.retry}.")
+        #                 break
+        #             if retry.lower() == "n":
+        #                 raise
+        #             print()
+        #         errno = 10053
+        #     elif e.args[0].errno == 2:
+        #         print(f"{colorama.Fore.RED}{str(e)}")
+        #         while True:
+        #             print(
+        #                 f"{colorama.Fore.WHITE}Would you like to retry?(y/n) ", end=""
+        #             )
+        #             retry = input()
+        #             if retry.lower() == "y":
+        #                 print(f"{i+1} try out of {config.retry}.")
+        #                 break
+        #             if retry.lower() == "n":
+        #                 raise
+        #             print()
 
-            if i + 1 == config.retry + 1:
-                raise
-        else:
-            return response
+        #     if i + 1 == config.retry + 1:
+        #         raise
+        # else:
 
 
 # Functions for printing progress
@@ -260,9 +264,13 @@ def get_artist_gallery_title(
                 gallery_title=gallery_title, gallery_code=gallery_code
             )
         else:
-            raise nhentaiExceptions.DownloadNameFormatError(e)
+            raise nhentaiExceptions.DownloadNameFormatError(
+                error=e, msg="Error loading artistdownloadnameformat from Config.ini"
+            )
     except Exception as e:
-        raise nhentaiExceptions.DownloadNameFormatError(e)
+        raise nhentaiExceptions.DownloadNameFormatError(
+            error=e, msg="Error loading artistdownloadnameformat from Config.ini"
+        )
     return gallery_folder
 
 
@@ -283,9 +291,13 @@ def get_group_gallery_title(
                 gallery_title=gallery_title, gallery_code=gallery_code
             )
         else:
-            raise nhentaiExceptions.DownloadNameFormatError(e)
+            raise nhentaiExceptions.DownloadNameFormatError(
+                error=e, msg="Error loading groupdownloadnameformat from Config.ini"
+            )
     except Exception as e:
-        raise nhentaiExceptions.DownloadNameFormatError(e)
+        raise nhentaiExceptions.DownloadNameFormatError(
+            error=e, msg="Error loading groupdownloadnameformat from Config.ini"
+        )
     return gallery_folder
 
 
@@ -306,9 +318,13 @@ def get_gallery_title(
                 gallery_title=gallery_title, gallery_code=gallery_code
             )
         else:
-            raise nhentaiExceptions.DownloadNameFormatError(e)
+            raise nhentaiExceptions.DownloadNameFormatError(
+                error=e, msg="Error loading gallerydownloadnameformat from Config.ini"
+            )
     except Exception as e:
-        raise nhentaiExceptions.DownloadNameFormatError(e)
+        raise nhentaiExceptions.DownloadNameFormatError(
+            error=e, msg="Error loading gallerydownloadnameformat from Config.ini"
+        )
     return gallery_folder
 
 

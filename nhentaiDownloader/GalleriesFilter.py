@@ -93,6 +93,7 @@ class GalleriesFilter:
                     order_by="duplicate_id",
                 )
             ]
+        # If the above filters didn't remove everything in gallery_codes
         if len(gallery_codes) != 0:
             if len(gallery_codes) != len_gallery_codes:
                 print(
@@ -130,9 +131,6 @@ class GalleriesFilter:
         1. Duplicate filter: If duplicate=True in Config.ini, checks each code in gallery_codes and finds and removes the duplicates.
         2. Collection filter: If collection=True in Config.ini, checks each code in gallery_codes and finds and removes collections (COMICs, Anthologies, etc).
         """
-        gallery_metadata_dict = self.titles_getter(
-            name=name, gallery_codes=gallery_codes
-        )
 
         if self.config.collection:
             collection_filter = self.CollectionsFilter(
