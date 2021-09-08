@@ -63,7 +63,6 @@ def get_response_with_retry(url) -> requests.models.Response:
                     raise nhentaiExceptions.TimeoutError(response.url)
                 time.sleep(config.retrywait)
             else:
-                print("or maybe here")
                 raise response.raise_for_status()
 
         # except OSError as e:

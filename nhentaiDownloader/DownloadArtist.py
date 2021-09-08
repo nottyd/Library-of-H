@@ -8,7 +8,6 @@ colorama.init(autoreset=True)
 from nhentaiDownloader.GalleriesFilter import GalleriesFilter
 from nhentaiDownloader import Helper
 from nhentaiDownloader import GalleriesDownloader
-from nhentaiErrorHandling import nhentaiExceptions
 from nhentaiErrorHandling.Logging import StaticVariables
 from nhentaiErrorHandling.ExceptionHandling import exception_handling
 
@@ -58,26 +57,9 @@ class DownloadArtist:
         self.handle_errors()
 
     def handle_errors(self):
-        if StaticVariables.name_too_long.keys():
-            for (
-                artist_name,
-                gallery_codes_and_folders,
-            ) in StaticVariables.name_too_long.items():
-                for gallery_code_and_folder in gallery_codes_and_folders:
-                    Helper.log_and_print(
-                        error_family="OSError",
-                        error_type="name_too_long",
-                        gallery_title=gallery_code_and_folder[1],
-                    )
-                    gallery_folder = input("Enter new, shorter destination name:")
-                    GalleriesDownloader.galleries_downloader(
-                        gallery_folder=gallery_folder,
-                        gallery_codes=[gallery_code_and_folder[0]],
-                        artist_name=artist_name,
-                    )
-
         if StaticVariables.invalid_artists:
+            print()
             for invalid_artist in StaticVariables.invalid_artists:
                 print(
-                    f"{colorama.Fore.RED}Invalid artist: {colorama.Fore.BLUE}{invalid_artist}"
+                    f"{colorama.Fore.RED}Invalid artist name: {colorama.Fore.BLUE}{invalid_artist}"
                 )

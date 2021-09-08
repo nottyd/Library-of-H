@@ -36,21 +36,12 @@ class DownloadGallery:
             gallery_folder = None
             print()
 
-    def handle_errors(self):
-        if len(StaticVariables.name_too_long) > 0:
-            for gallery_code, gallery_folder in StaticVariables.name_too_long:
-                self.gallery_codes = [gallery_code]
-                Helper.log_and_print(
-                    error_family="OSError",
-                    error_type="name_too_long",
-                    gallery_title=gallery_folder,
-                )
-                gallery_folder = input("Enter new, shorter destination name:")
-                self.download_by_galleries(
-                    config=self.config, gallery_folder=gallery_folder
-                )
+        self.handle_errors()
 
-        for invalid_code in StaticVariables.invalid_codes:
-            print(
-                f"{colorama.Fore.RED}Invalid code: {colorama.Fore.BLUE}{invalid_code}"
-            )
+    def handle_errors(self):
+        if StaticVariables.invalid_galleries:
+            print()
+            for invalid_gallery in StaticVariables.invalid_galleries:
+                print(
+                    f"{colorama.Fore.RED}Invalid gallery ID: {colorama.Fore.BLUE}{invalid_gallery}"
+                )
