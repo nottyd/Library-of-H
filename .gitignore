@@ -1,6 +1,6 @@
-__pycache__
+__pycache__/
 *.conf
 *.db
 .todo
-nhentaiDownloaded
-logs
+logs/
+nhentaiDownloaded/

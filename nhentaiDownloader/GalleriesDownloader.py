@@ -23,7 +23,6 @@ def galleries_downloader(
                 gallery_code, artist_name=artist_name, group_name=group_name
             )
         except Exception as e:
-            print("yep", e)
             exception_handling(e)
             continue
 

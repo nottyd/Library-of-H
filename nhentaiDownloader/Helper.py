@@ -277,7 +277,7 @@ def get_artist_gallery_title(
 
 
 def get_group_gallery_title(
-    gallery_title, gallery_code, translated_title, original_title
+    gallery_title, gallery_code, translated_title, original_title, group_name
 ) -> str:
     try:
         gallery_folder = config.groupdownloadnameformat % locals()
