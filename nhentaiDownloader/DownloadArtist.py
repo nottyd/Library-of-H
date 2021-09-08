@@ -34,8 +34,6 @@ class DownloadArtist:
             try:
                 artist_soup = Helper.soup_maker(self.url)
             except BaseException as e:
-                print(e)
-                print(type(e))
                 exception_handling(e)
                 continue
 
