@@ -27,7 +27,7 @@ class DownloadGallery:
             )
             if not response:
                 GalleriesDownloader.galleries_downloader(
-                    gallery_codes=(gallery_code,),
+                    gallery_code,
                     save_dest=self.save_dest,
                     config=self.config,
                 )

@@ -1,13 +1,11 @@
 import os
 from typing import Union
 
-import colorama
-
 from nhentaiDownloader import Helper
 from nhentaiDownloader.MetadataHandler import MetadataHandler
 import nhentaiDBManager.DBWriter as DBWriter
 from nhentaiDBManager.DBReader import DBReader
-from nhentaiErrorHandling import Logging, nhentaiExceptions
+from nhentaiErrorHandling import nhentaiExceptions
 
 
 class GalleriesFilter:

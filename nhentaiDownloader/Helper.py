@@ -43,7 +43,9 @@ def get_response_with_retry(url) -> requests.models.Response:
     errno = 0
     for i in range(config.retry + 1):
         try:
-            response = requests.get(url, headers={"User-Agent": config.useragent})
+            response = requests.get(
+                url, headers={"User-Agent": config.useragent}, timeout=10
+            )
         except Exception:
             raise
         else:
