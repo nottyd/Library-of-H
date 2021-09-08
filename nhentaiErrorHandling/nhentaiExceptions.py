@@ -15,7 +15,7 @@ class nhentaiExceptions(Exception):
     DOWNLOAD_NAME_FORMAT_ERROR = 20002
 
     # Invalid user input errors
-    INVALID_CODE = 30001
+    INVALID_GALLERY = 30001
     INVALID_ARTIST = 30002
     INVALID_GROUP = 30003
 
@@ -55,13 +55,13 @@ class InvalidError(nhentaiExceptions):
     pass
 
 
-class InvalidCode(InvalidError):
-    def __init__(self, invalid_code, log_type="downloader"):
+class InvalidGallery(InvalidError):
+    def __init__(self, invalid_gallery, log_type="downloader"):
         self.log_type = log_type
-        self.invalid_code = invalid_code
-        self.log_msg = f"Invalid gallery ID: {invalid_code}"
+        self.invalid_gallery = invalid_gallery
+        self.log_msg = f"Invalid gallery ID: {invalid_gallery}"
         self.print_msg = f"{colorama.Fore.RED}{self.log_msg}"
-        self.error_code = nhentaiExceptions.INVALID_CODE
+        self.error_code = nhentaiExceptions.INVALID_GALLERY
 
 
 class InvalidArtist(InvalidError):
@@ -69,7 +69,7 @@ class InvalidArtist(InvalidError):
         self.log_type = log_type
         self.invalid_artist = invalid_artist
         self.log_msg = f"Invalid artist name: {invalid_artist}"
-        print_msg = f"{colorama.Fore.RED}{self.log_msg}"
+        self.print_msg = f"{colorama.Fore.RED}{self.log_msg}"
         self.error_code = nhentaiExceptions.INVALID_ARTIST
 
 
@@ -100,7 +100,7 @@ class LanguageNotAvailable(TitleError):
             gallery_title, gallery_code, gallery_folder, log_type="downloader"
         )
         self.log_msg = msg
-        print_msg = f"{colorama.Fore.RED}Error formatting title with %(translated_title)s and/or %(original_title)s: Title not available in those languages."
+        self.print_msg = f"{colorama.Fore.RED}Error formatting title with %(translated_title)s and/or %(original_title)s: Title not available in those languages."
         self.error_code = nhentaiExceptions.LANGUAGE_NOT_AVAILABLE_ERROR
 
 

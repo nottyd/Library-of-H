@@ -20,12 +20,24 @@ def exception_handling(e):
         elif (
             e.response.status_code == 404 or e.response.status_code == 410
         ):  # Page Not Found and Page Gone
-            Logging.log_and_print(
-                level="warning",
-                log_type="downloader",
-                log_msg=f"Page not found. URL => {e.response.url}",
-                print_msg=f"{colorama.Fore.RED}Page not found. URL => {e.response.url}",
-            )
+            if e.response.url.endswith("/"):
+                e.response.url = e.response.url[:-1]
+            try:
+                if "/artist/" in e.response.url:
+                    raise nhentaiExceptions.InvalidArtist(
+                        invalid_artist=e.response.url.split("/")[-1]
+                    )
+                if "/group/" in e.response.url:
+                    raise nhentaiExceptions.InvalidGroup(
+                        invalid_group=e.response.url.split("/")[-1]
+                    )
+                if "/g/" in e.response.url:
+                    raise nhentaiExceptions.InvalidGallery(
+                        invalid_gallery=e.response.url.split("/")[-1]
+                    )
+            except nhentaiExceptions.nhentaiExceptions as invalid_e:
+                exception_handling(invalid_e)
+
     elif isinstance(e, OSError):
         print(e.args[0].errno)
         if e.args[0].errno == 10053:
@@ -93,14 +105,14 @@ def exception_handling(e):
             )
             sys.exit()
 
-        elif e.error_code == nhentaiExceptions.nhentaiExceptions.INVALID_CODE:
+        elif e.error_code == nhentaiExceptions.nhentaiExceptions.INVALID_GALLERY:
             Logging.log_and_print(
                 level="warning",
                 log_type="downloader",
                 log_msg=e.log_msg,
                 print_msg=e.print_msg,
             )
-            StaticVariables.invalid_codes.append(e.gallery_code)
+            StaticVariables.invalid_galleries.append(e.invalid_gallery)
 
         elif e.error_code == nhentaiExceptions.nhentaiExceptions.INVALID_ARTIST:
             Logging.log_and_print(
@@ -109,7 +121,7 @@ def exception_handling(e):
                 log_msg=e.log_msg,
                 print_msg=e.print_msg,
             )
-            StaticVariables.invalid_codes.append(e.invalid_artist)
+            StaticVariables.invalid_artists.append(e.invalid_artist)
 
         elif e.error_code == nhentaiExceptions.nhentaiExceptions.INVALID_GROUP:
             Logging.log_and_print(
@@ -118,7 +130,7 @@ def exception_handling(e):
                 log_msg=e.log_msg,
                 print_msg=e.print_msg,
             )
-            StaticVariables.invalid_artists.append(e.invalid_group)
+            StaticVariables.invalid_groups.append(e.invalid_group)
 
         elif (
             e.error_code

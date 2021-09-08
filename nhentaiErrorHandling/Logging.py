@@ -12,7 +12,7 @@ class StaticVariables:
     Only to be used at the end.
     """
 
-    invalid_codes = list()
+    invalid_galleries = list()
     invalid_artists = list()
     invalid_groups = list()
     name_too_long = dict()
@@ -20,6 +20,7 @@ class StaticVariables:
 
 
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = None
 
 
 def _downloader_logging() -> logging.Logger:
@@ -54,13 +55,14 @@ def log_and_print(level, log_type, log_msg=None, print_msg=None) -> None:
 
 
 def log(level, log_msg, log_type=""):
+    global logger
     if not os.path.exists(_log_location):
         os.mkdir(_log_location)
-    if log_type == "downloader":
+    if log_type == "downloader" and "nhentaiDownloader" not in str(logger):
         logger = _downloader_logging()
-    if log_type == "explorer":
+    if log_type == "explorer" and "nhentaiExplorer" not in str(logger):
         logger = _explorer_logging()
-    if log_type == "dbmanager":
+    if log_type == "dbmanager" and "nhentaiDBManager" not in str(logger):
         logger = _dbmanager_logging()
 
     if level == "info":
@@ -77,3 +79,4 @@ def log(level, log_msg, log_type=""):
 
 def print_(print_msg):
     print(print_msg)
+    print()
