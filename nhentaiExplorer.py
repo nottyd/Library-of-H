@@ -38,7 +38,6 @@ class MainWindow(qtw.QMainWindow):
 
         with open(os.sep.join([".", "nhentaiExplorer", "stylesheet.css"])) as f:
             self.setStyleSheet(f.read())
-            pass
         self.show()
 
     def set_last_session_settings(self):
