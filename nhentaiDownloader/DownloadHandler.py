@@ -9,6 +9,8 @@ import urllib3.exceptions
 from nhentaiDownloader import Helper
 from nhentaiErrorHandling import nhentaiExceptions
 
+from nhentaiDownloader import Helper
+
 # Function for downloading image
 def downloader(image_links, save_dest, folder, config) -> None:
 
