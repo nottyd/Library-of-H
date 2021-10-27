@@ -4,6 +4,10 @@ import sys
 from pathlib import Path
 
 import requests
+import urllib3.exceptions
+
+from nhentaiDownloader import Helper
+from nhentaiErrorHandling import nhentaiExceptions
 
 from nhentaiDownloader import Helper
 
@@ -89,17 +93,20 @@ def downloader(image_links, save_dest, folder, config) -> None:
 
 
 def _write_to_disk(image_link, config, image_name, len_image_links, index):
-    with requests.get(
-        image_link, headers={"User-Agent": config.useragent}, stream=True, timeout=10
-    ) as online_image:
-        online_image.raise_for_status()
-        with open(image_name, "wb") as f:
-            for chunk in online_image.iter_content(chunk_size=100000):
-                # If you have chunk encoded response uncomment if
-                # and set chunk_size parameter to None.
-                # if chunk:
-                f.write(chunk)
-            Helper.print_bar_progress(
-                total=len_image_links, progress=index, msg="Downloaded pages"
-            )
-            Helper.set_console_title(download_progress=f"[{index} / {len_image_links}]")
+    try:
+        with requests.get(
+            image_link, headers={"User-Agent": config.useragent}, stream=True, timeout=10
+        ) as online_image:
+            online_image.raise_for_status()
+            with open(image_name, "wb") as f:
+                for chunk in online_image.iter_content(chunk_size=100000):
+                    # If you have chunk encoded response uncomment if
+                    # and set chunk_size parameter to None.
+                    # if chunk:
+                    f.write(chunk)
+                Helper.print_bar_progress(
+                    total=len_image_links, progress=index, msg="Downloaded pages"
+                )
+                Helper.set_console_title(download_progress=f"[{index} / {len_image_links}]")
+    except urllib3.exceptions.ReadTimeoutError as e:
+        raise nhentaiExceptions.TimeoutError(url=image_link)
