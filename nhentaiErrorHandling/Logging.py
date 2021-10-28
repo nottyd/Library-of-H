@@ -18,6 +18,13 @@ class StaticVariables:
     name_too_long = dict()
     language_not_available = dict()
 
+    @classmethod
+    def reset(cls):
+        cls.invalid_galleries = list()
+        cls.invalid_artists = list()
+        cls.name_too_long = list()
+        cls.language_not_available = dict()
+
 
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = None

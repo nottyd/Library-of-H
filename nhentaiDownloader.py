@@ -22,6 +22,7 @@ Enter x to exit.
 >> """
 config = Config()
 while True:
+    Logging.StaticVariables.reset()
     try:
         Helper.set_console_title(title_type="menu")
         choice = input(menu).lower()
